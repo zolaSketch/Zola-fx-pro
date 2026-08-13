@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05080f">
+<title>ZOLA MarketDNA — የገበያ ዲኤንኤ ላብ</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">🧬</span>
+    <div class="brand-text">
+      <h1>ZOLA <span class="grad">MarketDNA</span></h1>
+      <p data-i18n="tagline">AI የገበያውን "የአየር ሁኔታ" የሚማርበት ኳንት ላብ</p>
+    </div>
+  </div>
+  <div class="top-actions">
+    <span id="sourceBadge" class="badge badge-sim" data-i18n="source_sim">ሲሙሌሽን</span>
+    <button id="langBtn" class="lang-btn" title="Switch language">EN</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-view="dna">🧬 <span data-i18n="tab_dna">ገበያ ዲኤንኤ</span></button>
+  <button class="tab" data-view="evolve">🧪 <span data-i18n="tab_evolve">ስትራቴጂ ኢቮልቨር</span></button>
+  <button class="tab" data-view="hof">🏆 <span data-i18n="tab_hof">የክብር አዳራሽ</span></button>
+  <button class="tab" data-view="about">ℹ️ <span data-i18n="tab_about">ስለ ፕሮጀክቱ</span></button>
+</nav>
+
+<main>
+  <!-- ══════════ MARKET DNA ══════════ -->
+  <section id="view-dna" class="view active">
+    <div class="toolbar">
+      <label class="field">
+        <span class="field-label" data-i18n="symbol">ምልክት</span>
+        <select id="symbolSel"></select>
+      </label>
+      <div class="field">
+        <span class="field-label" data-i18n="interval">የጊዜ ክፍተት</span>
+        <div class="seg" id="intervalSeg">
+          <button data-iv="1h">1h</button>
+          <button data-iv="4h">4h</button>
+          <button data-iv="1d">1d</button>
+        </div>
+      </div>
+      <label class="field grow">
+        <span class="field-label"><span data-i18n="bars">ካንደሎች</span>: <b id="barsVal">1000</b></span>
+        <input type="range" id="barsRange" min="300" max="1500" step="100" value="1000">
+      </label>
+      <button id="loadBtn" class="btn btn-primary" data-i18n="load">ዳታ ጫን</button>
+    </div>
+
+    <div class="stat-row" id="statRow">
+      <div class="stat-card">
+        <div class="stat-label" data-i18n="weather_now">የአሁኑ የአየር ሁኔታ</div>
+        <div class="stat-value" id="statRegime">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-i18n="volatility">መለዋወጥ (Volatility)</div>
+        <div class="stat-value" id="statVol">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-i18n="trend60">የ60-ካንደል አዝማሚያ</div>
+        <div class="stat-value" id="statTrend">—</div>
+      </div>
+      <div class="stat-card grow">
+        <div class="stat-label" data-i18n="distribution">የሬጂም ስርጭት</div>
+        <div class="stat-value dist-bar" id="statDist"></div>
+      </div>
+    </div>
+
+    <div class="panel chart-panel">
+      <div class="chart-head">
+        <span id="chartTitle">BTCUSD · 1h</span>
+        <span class="legend" id="regimeLegend"></span>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="candleCanvas"></canvas>
+        <div id="chartTooltip" class="tooltip" hidden></div>
+      </div>
+    </div>
+
+    <p class="note" data-i18n="dna_note">እያንዳንዱ ካንደል በተማረው የገበያ "የአየር ሁኔታ" (ሬጂም) ቀለም ተቀብቷል — ዘግይቶ የሚመጣ ኢንዲኬተር ሳይሆን፣ AI የገበያውን ሁኔታ ስታቲስቲካዊ አሻራ ነው። ወደ ስትራቴጂ ኢቮልቨር ሂድና ይህን ዲኤንኤ የሚጠቀም ስትራቴጂ እንዲፈጠር አድርግ።</p>
+  </section>
+
+  <!-- ══════════ EVOLVER ══════════ -->
+  <section id="view-evolve" class="view">
+    <div class="panel">
+      <h2 data-i18n="evolve_title">የጄኔቲክ ስትራቴጂ ኢቮሉሽን</h2>
+      <p class="sub" data-i18n="evolve_sub">ስትራቴጂዎች እንደ ፍጡራን ተወዳድረው በ Walk-Forward ማረጋገጫ ያሸነፈው ብቻ ይተርፋል — ከናሙና ውጭ በጠንካራ ውጤት ያለው ጂኖም አሸናፊ ይሆናል፣ በባክቴስት ብቻ የሚያብረቀርቅ አይደለም።</p>
+      <div class="toolbar">
+        <label class="field">
+          <span class="field-label" data-i18n="population">ህዝብ (Population)</span>
+          <input type="number" id="popIn" min="8" max="32" step="4" value="16">
+        </label>
+        <label class="field">
+          <span class="field-label" data-i18n="generations">ትውልዶች</span>
+          <input type="number" id="genIn" min="6" max="30" step="2" value="14">
+        </label>
+        <label class="field">
+          <span class="field-label" data-i18n="folds">Walk-Forward እጥፋቶች</span>
+          <input type="number" id="foldIn" min="2" max="5" step="1" value="3">
+        </label>
+        <button id="runBtn" class="btn btn-primary big" data-i18n="run">🧬 ኢቮሉሽን ጀምር</button>
+      </div>
+      <div class="progress-wrap" id="progressWrap" hidden>
+        <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-stage" id="progressStage">…</div>
+      </div>
+    </div>
+
+    <div id="resultsWrap" hidden>
+      <div class="panel">
+        <div class="champ-head">
+          <div>
+            <h2 data-i18n="champion">🏆 አሸናፊው ጂኖም</h2>
+            <div class="dna-code"><span data-i18n="dna_code">የዲኤንኤ ኮድ</span>: <code id="dnaText">—</code>
+              <button class="btn btn-ghost" id="copyDna" data-i18n="copy">ቅዳ</button>
+              <button class="btn btn-ghost" id="saveHof" data-i18n="save_hof">🏆 አስቀምጥ</button>
+            </div>
+            <div class="chips" id="paramChips"></div>
+          </div>
+          <div class="oos-stamp" id="oosStamp">—</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="mini-panel">
+            <h3 data-i18n="honesty">📜 የሐቀኝነት ሪፖርት</h3>
+            <table class="metrics-table" id="honestyTable">
+              <thead><tr>
+                <th data-i18n="metric">መለኪያ</th>
+                <th data-i18n="in_sample">በስልጠና ዳታ</th>
+                <th data-i18n="out_sample">ከናሙና ውጭ</th>
+                <th data-i18n="naive_label">ሙሉ ዳታ (naive)</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+            <p class="mini-note" id="gapNote"></p>
+          </div>
+          <div class="mini-panel">
+            <h3 data-i18n="folds_title">🔁 Walk-Forward እጥፋቶች</h3>
+            <table class="metrics-table" id="foldsTable">
+              <thead><tr><th data-i18n="fold">እጥፋት</th><th data-i18n="oos_sharpe">OOS Sharpe</th><th data-i18n="oos_trades">ግብይቶች</th><th data-i18n="oos_dd">Max DD %</th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <p class="mini-note" id="consistencyNote"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 data-i18n="equity_title">📈 የአሸናፊው አቋም — ከናሙና ውጭ ያልታየ ዳታ ላይ</h3>
+        <div class="chart-wrap small">
+          <canvas id="equityCanvas"></canvas>
+        </div>
+        <div class="legend inline" id="equityLegend"></div>
+      </div>
+
+      <div class="panel">
+        <h3 data-i18n="fitness_title">🧬 የአካል ብቃት (Fitness) ታሪክ — የእያንዳንዱ ትውልድ ምርጥ</h3>
+        <div class="chart-wrap small">
+          <canvas id="fitnessCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" id="evolveNote" hidden data-i18n="evolve_note">ይህ ምርምር-ማሳያ መሳሪያ እንጂ የፋይናንስ ምክር አይደለም። ያለፈ ውጤት የወደፊት ውጤትን አያረጋግጥም። በእውነተኛ ገንዘብ ከመጠቀምህ በፊት በደንብ ሞክር።</p>
+  </section>
+
+  <!-- ══════════ HALL OF FAME ══════════ -->
+  <section id="view-hof" class="view">
+    <div class="panel">
+      <h2 data-i18n="hof_title">🏆 የክብር አዳራሽ</h2>
+      <p class="sub" data-i18n="hof_sub">ያሸነፉት ጂኖሞች — በሐቀኝነት ሪፖርታቸው ጋር። ኮዳቸውን በመቅዳት ለማንም አጋራ።</p>
+      <div id="hofGrid" class="hof-grid"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ ABOUT ══════════ -->
+  <section id="view-about" class="view">
+    <div class="panel about-panel">
+      <h2 data-i18n="about_title">ለምን ZOLA MarketDNA? 🧬</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-icon">🌍</div>
+          <h3 data-i18n="about_a_title">የመጀመሪያው አማርኛ-ተኮር ኳንት ላብ</h3>
+          <p data-i18n="about_a_body">ከ120 ሚሊዮን በላይ የአማርኛ ተናጋሪ ህዝብ አለ — ግን እውነተኛ የኳንት ትንተና መሳሪያ በአማርኛ የለም። ይህ የመጀመሪያው ነው።</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🧬</div>
+          <h3 data-i18n="about_b_title">የሬጂም ዲኤንኤ ሞተር</h3>
+          <p data-i18n="about_b_body">AI የገበያውን ሁኔታ ራሱ ተምሮ ይከፍላል — ረጋ፣ ጭማሪ፣ ቅናሽ፣ ማዕበል። ኢንዲኬተር አይደለም — የገበያ ሁኔታ ስታቲስቲካዊ አሻራ ነው።</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🦖</div>
+          <h3 data-i18n="about_c_title">የጄኔቲክ ኢቮሉሽን</h3>
+          <p data-i18n="about_c_body">ስትራቴጂዎች በዳርዊናዊ ውድድር ይፈጠራሉ — ምርጦቹ ተዳቅለው፣ ተለውጠው፣ ተወዳድረው። ያሸነፈው በ Walk-Forward ማረጋገጫ የተረጋገጠ ብቻ ነው።</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">🛡️</div>
+          <h3 data-i18n="about_d_title">የሐቀኝነት ሞተር</h3>
+          <p data-i18n="about_d_body">በትሬዲንግ ኢንዱስትሪ ያለው #1 ማጭበርበር ውብ ባክቴስት ነው። እኛ እያንዳንዱ ጂኖም ኢን-ሳምፕል vs አውት-ኦፍ-ሳምፕል ውጤቱን በግልፅ ያሳያል — የሐሰት ተስፋ አይሰጥም።</p>
+        </div>
+      </div>
+      <div class="about-tech">
+        <h3 data-i18n="tech_title">ቴክኖሎጂ</h3>
+        <p data-i18n="tech_body">100% ኦፕን-ሶርስ፣ ዜሮ ጥገኝነት — ንፁህ Python (stdlib ብቻ) + vanilla JavaScript + Canvas። የገበያ ዳታ በቀጥታ ከBinance/Coinbase/CoinGecko (የተጠቃሚው ብራውዘር) ወይም ከመስመር ውጭ ሲሙሌሽን ሞተር። ሁሉም ኮምፒውቴሽን በአገር ውስጥ ይሰራል።</p>
+      </div>
+      <div class="about-roadmap">
+        <h3 data-i18n="roadmap_title">የወደፊት መንገድ (Roadmap)</h3>
+        <ol>
+          <li data-i18n="rm1">v1.0 — ኦፕን-ሶርስ ኮር፡ የሬጂም ዲኤንኤ + የጄኔቲክ ኢቮልቨር + የክብር አዳራሽ (✅ አሁን እያየህ ያለው)</li>
+          <li data-i18n="rm2">v1.5 — ደመና ኢቮሉሽን፡ ትላልቅ ህዝቦች፣ ብዙ ምልክቶች፣ Telegram ማንቂያዎች</li>
+          <li data-i18n="rm3">v2.0 — የህዝብ መሪ ሰሌዳ (Live Leaderboard)፡ ጂኖሞች በቀጥታ ውድድር</li>
+          <li data-i18n="rm4">v3.0 — የጂኖም ገበያ (Marketplace) + የአማርኛ ኳንት አካዳሚ</li>
+        </ol>
+      </div>
+      <p class="note" data-i18n="about_disclaimer">ZOLA MarketDNA የምርምር እና ትምህርት መሳሪያ ነው — የፋይናንስ ምክር አይሰጥም። በተዘጋጀው ባለሙያ እና ጸሃፊ የለውም።</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>🧬 ZOLA MarketDNA v1.0 — open source · ኦፕን ሶርስ</span>
+  <span id="footerStatus">…</span>
+</footer>
+
+<div id="toast" class="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
