@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4a1c14">
+<title>Zola Sketch — መተግበሪያዎች</title>
+<meta name="description" content="የZola Sketch የድር መተግበሪያዎች ስብስብ። ቅዳሴ መልመጃ እና ሌሎችም።">
+<link rel="apple-touch-icon" href="kidase/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="kidase/icon-192.png">
+<style>
+:root{
+  --bg:#faf6f0;
+  --paper:#fffdfa;
+  --ink:#2c1f18;
+  --ink-soft:#6b5a4e;
+  --line:#e8ddd0;
+  --maroon:#6b1f14;
+  --maroon-dk:#4a1c14;
+  --gold:#b8860b;
+  --gold-lt:#f0e2bd;
+  --green:#1f6b3a;
+  --shadow:0 2px 8px rgba(74,28,20,.08);
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Noto Sans Ethiopic','Abyssinica SIL','Nyala',system-ui,-apple-system,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:16px;line-height:1.75;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+
+/* ── HEADER ── */
+.topbar{
+  background:linear-gradient(135deg,var(--maroon-dk),var(--maroon));
+  color:#fff;padding:2.2rem 1rem 2.6rem;
+  text-align:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.cross{font-size:2.4rem;color:var(--gold-lt);display:block;margin-bottom:.5rem}
+.topbar h1{font-size:1.6rem;font-weight:700;line-height:1.25;letter-spacing:.5px}
+.topbar p{font-size:.85rem;opacity:.82;margin-top:.4rem}
+
+/* ── MAIN ── */
+main{
+  flex:1;width:100%;max-width:680px;margin:0 auto;
+  padding:1.8rem 1rem 3rem;
+}
+.section-label{
+  font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--ink-soft);font-weight:700;margin-bottom:.9rem;
+  display:flex;align-items:center;gap:.6rem;
+}
+.section-label::after{
+  content:"";flex:1;height:1px;background:var(--line);
+}
+
+/* ── APP CARD ── */
+.card{
+  display:block;text-decoration:none;color:inherit;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:1.15rem 1.2rem;
+  margin-bottom:.9rem;
+  transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 18px rgba(74,28,20,.14);
+  border-color:var(--gold);
+}
+.card:active{transform:translateY(0)}
+.card-top{display:flex;align-items:center;gap:.85rem}
+.card-icon{
+  width:52px;height:52px;border-radius:13px;flex-shrink:0;
+  display:grid;place-items:center;font-size:1.7rem;
+  background:linear-gradient(135deg,var(--maroon-dk),var(--maroon));
+  color:var(--gold-lt);
+  box-shadow:0 2px 6px rgba(74,28,20,.25);
+}
+.card-icon img{width:52px;height:52px;border-radius:13px;display:block}
+.card-text{min-width:0;flex:1}
+.card h2{font-size:1.08rem;font-weight:700;line-height:1.3}
+.card .sub{font-size:.78rem;color:var(--ink-soft);line-height:1.45;margin-top:.15rem}
+.chev{color:var(--gold);font-size:1.3rem;flex-shrink:0}
+.card p.desc{
+  font-size:.85rem;color:var(--ink-soft);
+  margin-top:.85rem;padding-top:.85rem;border-top:1px solid var(--line);
+}
+.badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.75rem}
+.badge{
+  font-size:.68rem;font-weight:600;letter-spacing:.3px;
+  padding:.22rem .6rem;border-radius:999px;
+  background:var(--gold-lt);color:#6d4c07;
+}
+.badge.live{background:#dcf0e3;color:var(--green)}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:1.4rem 1rem 2rem;
+  font-size:.75rem;color:var(--ink-soft);
+  border-top:1px solid var(--line);
+}
+footer a{color:var(--maroon);text-decoration:none;font-weight:600}
+footer a:hover{text-decoration:underline}
+
+@media(max-width:400px){
+  .topbar h1{font-size:1.35rem}
+  .card-icon,.card-icon img{width:46px;height:46px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <span class="cross">✚</span>
+  <h1>Zola Sketch</h1>
+  <p>የድር መተግበሪያዎች ስብስብ</p>
+</header>
+
+<main>
+  <div class="section-label">መተግበሪያዎች</div>
+
+  <a class="card" href="kidase/">
+    <div class="card-top">
+      <div class="card-icon"><img src="kidase/icon-192.png" alt=""></div>
+      <div class="card-text">
+        <h2>ቅዳሴ መልመጃ</h2>
+        <div class="sub">ሥርዓተ ቅዳሴ ወአኰቴተ ቁርባን ዘሐዋርያት</div>
+      </div>
+      <span class="chev">›</span>
+    </div>
+    <p class="desc">የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን ሥርዓተ ቅዳሴ መልመጃ። ንባብ፣ ልምምድ፣ ተሰጥኦ እና ፈተና — በግዕዝ፣ በአማርኛ እና በእንግሊዝኛ።</p>
+    <div class="badges">
+      <span class="badge live">● ቀጥታ</span>
+      <span class="badge">PWA — ኦፍላይን</span>
+      <span class="badge">ግዕዝ / አማርኛ / English</span>
+    </div>
+  </a>
+</main>
+
+<footer>
+  <a href="https://github.com/zolaSketch/Zola-fx-pro">GitHub ላይ ይመልከቱ</a>
+</footer>
+
+</body>
+</html>
