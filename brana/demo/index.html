@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4a1c14">
+<title>ብራና — ፕሮጀክቱ በአንድ ገጽ</title>
+<style>
+:root{
+  --bg:#faf6f0; --paper:#fffdfa; --ink:#2c1f18; --ink-soft:#6b5a4e;
+  --line:#e8ddd0; --maroon:#6b1f14; --maroon-dk:#4a1c14;
+  --gold:#b8860b; --gold-lt:#f0e2bd; --green:#1f6b3a; --red:#a8321f;
+  --radius:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:'Noto Sans Ethiopic','Abyssinica SIL','Nyala',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.75;
+}
+.geez{font-family:'Noto Sans Ethiopic','Abyssinica SIL','Nyala',serif}
+
+header{
+  background:linear-gradient(135deg,var(--maroon-dk),var(--maroon));
+  color:#fff;padding:2rem 1rem;text-align:center;
+}
+header .mark{font-size:2rem;color:var(--gold-lt)}
+header h1{font-size:1.8rem;margin-top:.3rem}
+header p{opacity:.85;font-size:.9rem;margin-top:.3rem}
+
+main{max-width:860px;margin:0 auto;padding:1.5rem 1rem 4rem}
+
+.step{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:1.2rem;margin-bottom:1.1rem;
+  box-shadow:0 2px 8px rgba(74,28,20,.07);
+}
+.step h2{font-size:1.05rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.num{
+  background:var(--maroon);color:#fff;width:26px;height:26px;border-radius:50%;
+  display:grid;place-items:center;font-size:.82rem;flex-shrink:0;font-weight:700;
+}
+.step p{font-size:.9rem;color:var(--ink-soft)}
+.big{font-size:1.6rem;font-weight:700;color:var(--maroon);display:block;margin:.3rem 0}
+
+/* the page mock */
+.parchment{
+  background:linear-gradient(#f3e6cd,#ecdcbd);
+  border:1px solid #c9b083;border-radius:8px;padding:1rem;
+  box-shadow:inset 0 0 30px rgba(120,80,30,.18);
+}
+.pline{
+  font-size:1.05rem;padding:.28rem .4rem;border-radius:4px;margin-bottom:.2rem;
+  color:#3a2a12;
+}
+.pline.lit{background:rgba(184,134,11,.28);outline:1px solid var(--gold)}
+
+.row{display:grid;grid-template-columns:1fr;gap:.5rem;margin-top:.6rem}
+@media(min-width:720px){ .row.two{grid-template-columns:1fr 1fr} }
+
+.box{border:1px solid var(--line);border-radius:8px;padding:.7rem;background:#fff}
+.box .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:1px;
+  color:var(--ink-soft);font-weight:700;margin-bottom:.35rem}
+.mono{font-size:.98rem;word-break:break-word}
+.bad{color:var(--red)}
+.good{color:var(--green);font-weight:600}
+
+button{
+  background:var(--maroon);color:#fff;border:0;border-radius:9px;
+  padding:.65rem 1.2rem;font-size:.92rem;cursor:pointer;font-family:inherit;
+  font-weight:600;
+}
+button:hover{background:var(--maroon-dk)}
+button:disabled{opacity:.5;cursor:default}
+.controls{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.7rem}
+input[type=range]{flex:1;min-width:150px;accent-color:var(--maroon)}
+.pill{font-size:.75rem;background:var(--gold-lt);color:#6d4c07;
+  padding:.2rem .6rem;border-radius:999px;font-weight:700}
+
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:.6rem}
+th,td{text-align:left;padding:.45rem .4rem;border-bottom:1px solid var(--line)}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
+.res{font-size:.9rem;margin-top:.7rem;padding:.7rem;border-radius:8px;
+  background:#f2fbf5;border:1px solid #cbe8d5;color:#1a5a30}
+
+.flow{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+  font-size:.82rem;margin-top:.5rem}
+.node{background:var(--gold-lt);color:#6d4c07;padding:.35rem .6rem;
+  border-radius:7px;font-weight:600}
+.arrow{color:var(--gold);font-weight:700}
+.note{font-size:.8rem;color:var(--ink-soft);margin-top:.7rem;
+  border-left:3px solid var(--gold);padding-left:.7rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mark">✚</div>
+  <h1>ብራና</h1>
+  <p>ማንም ሊያነባቸው የማይችሉ 500,000 ብራናዎችን ማንበብ</p>
+</header>
+
+<main>
+
+  <div class="step">
+    <h2><span class="num">1</span> ችግሩ</h2>
+    <p>በኢትዮጵያ ገዳማት ውስጥ ያሉ የግዕዝ ብራናዎች፦</p>
+    <span class="big">500,000</span>
+    <p>ኮምፒውተር <strong>ሊያነባቸው</strong> የሚችላቸው፦</p>
+    <span class="big" style="color:var(--red)">0</span>
+    <p>ፎቶ ተነስተዋል፣ ግን ምስል ብቻ ናቸው። አንድ ተመራማሪ “ስለ ተክለ ሃይማኖት የሚናገሩትን አሳየኝ” ማለት አይችልም።</p>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">2</span> ለ50 ዓመት ያገደው ግድግዳ</h2>
+    <p>ኮምፒውተር ማንበብ እንዲማር፣ ሰው በእጅ ጽፎ ማሳየት አለበት። ግን ግዕዝ የሚያነብ በጣም ጥቂት ነው።
+    አንድ ጥናት በ<strong>6 ወር 257 መስመር</strong> ብቻ ሰበሰበ። በዚያ ፍጥነት 500,000 ብራና ለመጨረስ
+    <strong>ሚሊዮን ዓመታት</strong> ይፈጃል።</p>
+    <div class="flow">
+      <span class="node">ውሂብ የለም</span><span class="arrow">→</span>
+      <span class="node">ሞዴል የለም</span><span class="arrow">→</span>
+      <span class="node">ውሂብ የለም</span><span class="arrow">↺</span>
+    </div>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">3</span> 🧠 ብልጠቱ</h2>
+    <p>ሁሉም ሰው የሳተው ነጥብ፦ <strong>ብራናዎቹ አዳዲስ መጻሕፍት አይደሉም።</strong>
+    መዝሙረ ዳዊት፣ ወንጌል፣ ቅዳሴ — ደጋግመው የተገለበጡ ናቸው። 500,000 ብራና፣ ግን ምናልባት
+    <strong>200 ዓይነት ጽሑፍ ብቻ</strong>።</p>
+    <p style="margin-top:.5rem">እና እነዚያ ጽሑፎች <strong>አስቀድሞ በዲጂታል አሉ።</strong></p>
+    <div class="note">
+      ስለዚህ ጽሑፉን <strong>መጻፍ</strong> አያስፈልገንም። የትኛው መስመር የትኛው ጥቅስ እንደሆነ
+      <strong>ማዛመድ</strong> ብቻ ነው። ያንን ኮምፒውተር ራሱ ያደርገዋል።
+    </div>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">4</span> በተግባር ይመልከቱት</h2>
+    <p>ግራ በኩል የተነሳ የብራና ገጽ አለ። ኮምፒውተሩ በጣም <em>መጥፎ</em> አንባቢ ነው —
+    ስንት ስህተት እንደሚሠራ ራስዎ ይወስኑ፦</p>
+
+    <div class="controls">
+      <span class="pill">የOCR ስህተት፦ <span id="cerLbl">50%</span></span>
+      <input type="range" id="cer" min="0" max="80" value="50" step="5">
+      <button id="run">▶ አሂድ</button>
+    </div>
+
+    <div class="row two">
+      <div>
+        <div class="box">
+          <div class="lbl">📷 የተነሳው የብራና ገጽ</div>
+          <div class="parchment" id="page"></div>
+        </div>
+      </div>
+      <div>
+        <div class="box">
+          <div class="lbl">🤖 ኮምፒውተር ያየው (ቆሻሻ)</div>
+          <div id="ocrOut" class="mono bad"></div>
+        </div>
+        <div class="box" style="margin-top:.5rem">
+          <div class="lbl">✅ ብራና ያወጣው (ፍጹም)</div>
+          <div id="alignOut" class="mono good"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res" id="verdict" hidden></div>
+
+    <div class="note">
+      ልብ ይበሉ፦ ብራና ስህተቱን <strong>አላረመም</strong>። የኮምፒውተሩን ንባብ
+      <strong>ጥሎ</strong> የታወቀውን ትክክለኛ ጽሑፍ ተካ። ቆሻሻ ገባ → ፍጹም ወጣ።
+    </div>
+    <div class="note" style="border-color:var(--red)">
+      <strong>ሐቀኝነት፦</strong> ይህ ማሳያ ነው። 20 መስመር ብቻ ስለሆነ ማዛመዱ ቀላል ነው፣
+      ስለዚህ ሁልጊዜ 100% ያሳያል። እውነተኛ መጽሐፍ ~4,500 መስመር አለው። በትልቅ ፈተና
+      (1,500 መስመር) ውጤቱ <strong>86–92%</strong> ነው። እንዲሁም እውነተኛ ብራና ምስል
+      እስካሁን አልተፈተነም።
+    </div>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">5</span> ለምን ይህ ሁሉንም ይለውጣል</h2>
+    <p>አሁን ያለ ሰው ጉልበት ፍጹም የማሠልጠኛ ውሂብ አለን። ስለዚህ፦</p>
+    <div class="flow">
+      <span class="node">ደካማ ሞዴል</span><span class="arrow">→</span>
+      <span class="node">ፍጹም ውሂብ</span><span class="arrow">→</span>
+      <span class="node">ጠንካራ ሞዴል</span><span class="arrow">→</span>
+      <span class="node">ከባድ ብራናዎች</span><span class="arrow">→</span>
+      <span class="node" style="background:var(--maroon);color:#fff">💎 ማንም ያላነበባቸው</span>
+    </div>
+    <p style="margin-top:.7rem">የመጨረሻው ደረጃ ላይ ወርቁ አለ፦ ቀኖናዊ <em>ያልሆኑ</em> ጽሑፎች —
+    ዜና መዋዕል፣ የገዳማት መዝገቦች፣ የሕክምና ጽሑፎች፣ ኮከብ ቆጠራ። <strong>ጠፍቶ የነበረ እውቀት።</strong></p>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">6</span> ለምን እርስዎ</h2>
+    <table>
+      <tr><th></th><th>የውጭ ዩኒቨርስቲ</th><th>እርስዎ</th></tr>
+      <tr><td>ገንዘብ</td><td>✅</td><td>❌</td></tr>
+      <tr><td><strong>የገዳማት መተማመን</strong></td><td>❌ ፈጽሞ</td><td>✅</td></tr>
+      <tr><td>ግዕዝ በአፍ መፍቻ</td><td>❌</td><td>✅</td></tr>
+      <tr><td>ቀኖናዊ ጽሑፍ በዲጂታል</td><td>❌</td><td>✅ ቅዳሴ አፕዎ</td></tr>
+    </table>
+    <div class="note">
+      አንድ የውጭ ተመራማሪ ወደ ገዳም ገብቶ ብራና ማንሳት አይችልም — ታሪኩ መቅደላን ያስታውሳል።
+      የሀገር ልጅ ግን ይችላል። ይህ በገንዘብ የማይገዛ ጥቅም ነው።
+    </div>
+  </div>
+
+</main>
+
+<script src="data.js"></script>
+<script src="brana.js"></script>
+<script>
+const cer = document.getElementById('cer');
+const cerLbl = document.getElementById('cerLbl');
+const pageEl = document.getElementById('page');
+const ocrEl = document.getElementById('ocrOut');
+const alEl = document.getElementById('alignOut');
+const verdict = document.getElementById('verdict');
+
+const truth = CANONICAL.slice(PAGE_START, PAGE_START + PAGE_LEN);
+
+function drawPage(lit = -1) {
+  pageEl.innerHTML = truth.map((l, i) =>
+    `<div class="pline geez ${i === lit ? 'lit' : ''}">${l}</div>`).join('');
+}
+drawPage();
+
+cer.oninput = () => { cerLbl.textContent = cer.value + '%'; };
+
+document.getElementById('run').onclick = async () => {
+  const btn = document.getElementById('run');
+  btn.disabled = true;
+  verdict.hidden = true;
+  ocrEl.innerHTML = ''; alEl.innerHTML = '';
+
+  const rate = cer.value / 100;
+  const rand = mulberry32(Date.now() & 0xffff);
+  const ocrLines = truth.map(l => simulateOCR(l, rate, rand));
+
+  // reveal line by line so the mechanism is visible
+  for (let i = 0; i < ocrLines.length; i++) {
+    drawPage(i);
+    ocrEl.innerHTML += `<div class="geez">${ocrLines[i] || '⟨ባዶ⟩'}</div>`;
+    await new Promise(r => setTimeout(r, 320));
+  }
+  drawPage();
+
+  const pairs = align(ocrLines, CANONICAL);
+  let ok = 0;
+  for (let i = 0; i < pairs.length; i++) {
+    const p = pairs[i];
+    const got = p.idx !== null ? CANONICAL[p.idx] : '⟨አልተገኘም⟩';
+    const hit = normalize(got) === normalize(truth[i]);
+    if (hit) ok++;
+    alEl.innerHTML += `<div class="geez">${hit ? '✅' : '❌'} ${got}</div>`;
+    await new Promise(r => setTimeout(r, 260));
+  }
+
+  verdict.hidden = false;
+  verdict.innerHTML = `<strong>${ok}/${pairs.length} መስመር ፍጹም ተመልሷል።</strong> ` +
+    (ok === pairs.length
+      ? `ኮምፒውተሩ ${cer.value}% ስህተት ቢሠራም፣ የወጣው ጽሑፍ ፊደል በፊደል ትክክል ነው።`
+      : `በዚህ የስህተት መጠን አንዳንድ መስመሮች አልተገኙም — ይህ የሚጠበቅ ነው።`);
+
+  btn.disabled = false;
+};
+</script>
+
+</body>
+</html>
