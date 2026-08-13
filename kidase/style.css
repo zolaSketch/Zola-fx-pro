@@ -292,3 +292,7 @@ main{max-width:840px;margin:0 auto;padding:1rem}
   .line.r-ማስታወሻ,.line.star{background:#241c15}
   .sidebar li.cur{background:#2e231a}
 }
+
+/* install button */
+.install-btn{background:rgba(240,226,189,.22);font-size:1.05rem}
+.install-btn:active{background:rgba(240,226,189,.4)}
