@@ -301,12 +301,19 @@ main{max-width:840px;margin:0 auto;padding:1rem}
   .sidebar li.cur{background:#2e231a}
 }
 
+/* install button */
+.install-btn{background:rgba(240,226,189,.22);font-size:1.05rem}
+.install-btn:active{background:rgba(240,226,189,.4)}
+
 </style>
+
+
+
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ቅዳሴ መልመጃ">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="description" content="የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን ሥርዓተ ቅዳሴ ወአኰቴተ ቁርባን ዘሐዋርያት መልመጃ">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234a1c14'/%3E%3Ctext y='.9em' x='50' text-anchor='middle' font-size='78' fill='%23f0e2bd'%3E%E2%9C%9A%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 
@@ -319,6 +326,7 @@ main{max-width:840px;margin:0 auto;padding:1rem}
       <p>ሥርዓተ ቅዳሴ ወአኰቴተ ቁርባን ዘሐዋርያት</p>
     </div>
   </div>
+  <button id="installBtn" class="icon-btn install-btn" hidden style="display:none" aria-label="አፕ አድርግ">⬇</button>
   <button id="menuBtn" class="icon-btn" aria-label="ዝርዝር">☰</button>
 </header>
 
@@ -1782,6 +1790,24 @@ const QUICK_PAIRS = [
   renderFlash();
 })();
 
+</script>
+<script>
+/* ---- PWA: service worker + install prompt ---- */
+(function () {
+  var btn = document.getElementById('installBtn');
+  var deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferred = e;
+    if (btn) btn.hidden = false;
+  });
+  if (btn) btn.addEventListener('click', function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function () { deferred = null; btn.hidden = true; });
+  });
+  window.addEventListener('appinstalled', function () { if (btn) btn.hidden = true; });
+})();
 </script>
 </body>
 </html>
