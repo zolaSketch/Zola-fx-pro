@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ServiceWorker } from "@/components/core/ServiceWorker";
 
 /**
  * Self-hosted variable fonts (via @fontsource-variable) so the UI renders
@@ -28,7 +29,15 @@ export const metadata: Metadata = {
     "An Iron Man inspired AI assistant: voice control, live knowledge, holographic HUD, arc reactor telemetry and a real tool-calling brain.",
   applicationName: "J.A.R.V.I.S.",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    // iOS ignores SVG and manifest icons; it needs an opaque PNG link tag.
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
   appleWebApp: { capable: true, title: "JARVIS", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
 };
@@ -48,7 +57,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${orbitron.variable} ${mono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <ServiceWorker />
+      </body>
     </html>
   );
 }
