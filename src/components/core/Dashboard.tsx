@@ -19,6 +19,7 @@ import { SuitPanel } from "@/components/panels/SuitPanel";
 import { TimersPanel } from "@/components/panels/TimersPanel";
 import { DevicePanel } from "@/components/panels/DevicePanel";
 import { KnowledgePanel } from "@/components/panels/KnowledgePanel";
+import { DocsPanel } from "@/components/panels/DocsPanel";
 import { useJarvis } from "@/store/jarvis";
 import { cn } from "@/lib/utils";
 
@@ -86,11 +87,11 @@ export function Dashboard() {
           <Terminal />
         </Panel>
 
-        <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_minmax(0,0.6fr)] gap-3">
+        <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)_minmax(0,0.7fr)] gap-3">
           <SuitPanel />
           <ThreatPanel />
           <KnowledgePanel />
-          <TimersPanel />
+          <DocsPanel />
         </div>
       </div>
 
@@ -128,9 +129,10 @@ export function Dashboard() {
               )}
 
               {tab === "intel" && (
-                <div className="grid h-full min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
+                <div className="grid h-full min-h-0 grid-rows-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.85fr)] gap-2 overflow-y-auto">
                   <ThreatPanel />
                   <KnowledgePanel />
+                  <DocsPanel />
                 </div>
               )}
             </motion.div>

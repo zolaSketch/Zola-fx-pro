@@ -42,6 +42,8 @@ const elementProvider: Provider = {
   async run(q) {
     const e = findElement(q);
     if (!e) return null;
+    const k = (v: number | null) =>
+      v === null ? "—" : `${v} K (${(v - 273.15).toFixed(1)} °C)`;
     return {
       summary: `${e.name}, symbol ${e.sym}, atomic number ${e.z}. It is a ${e.group} with an atomic mass of ${e.mass}.`,
       meta: [
@@ -49,6 +51,11 @@ const elementProvider: Provider = {
         `ATOMIC No .. ${e.z}`,
         `MASS ....... ${e.mass} u`,
         `CATEGORY ... ${e.group}`,
+        `PERIOD ..... ${e.period}`,
+        `CONFIG ..... ${e.config}`,
+        `MELTING .... ${k(e.melt)}`,
+        `BOILING .... ${k(e.boil)}`,
+        `ELECTRONEG . ${e.electroneg ?? "—"}`,
       ],
       source: "Periodic table",
       confidence: 0.93,

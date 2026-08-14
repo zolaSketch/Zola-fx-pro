@@ -95,6 +95,23 @@ describe("intent routing precedence", () => {
     expectTool("distance between 51.5 -0.12 and 48.85 2.35", "web_lookup");
   });
 
+  it("routes live aircraft questions to the ADS-B radar", () => {
+    // Must not be captured by the simulated `scan` rule.
+    expectTool("what aircraft are near me", "air_traffic");
+    expectTool("any planes flying over", "air_traffic");
+    expectTool("show air traffic within 50 km", "air_traffic");
+  });
+
+  it("keeps the simulated sweep for threat phrasing", () => {
+    expectTool("scan the perimeter", "scan_threats");
+    expectTool("sweep for threats", "scan_threats");
+  });
+
+  it("routes personal document questions to on-device retrieval", () => {
+    expectTool("search my notes for the door code", "search_documents");
+    expectTool("what did i write about the reactor", "search_documents");
+  });
+
   it("routes definitions to knowledge", () => {
     expectTool("define serendipity", "web_lookup");
     expectTool("what does ubiquitous mean", "web_lookup");

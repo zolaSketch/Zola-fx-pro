@@ -61,20 +61,51 @@ export interface Element {
   name: string;
   mass: number;
   group: string;
+  /** Noble-gas shorthand electron configuration. */
+  config: string;
+  /** Kelvin; null where the element has no stable measured value. */
+  melt: number | null;
+  boil: number | null;
+  /** Pauling electronegativity. */
+  electroneg: number | null;
+  /** Period and group in the table. */
+  period: number;
 }
+
+/**
+ * Physical data for every element, packed as `melt|boil|electronegativity|config`.
+ * Values are null where an element is too short-lived to have a measured one.
+ */
+const RAW_PHYSICAL =
+  "13.99|20.271|2.2|1s1;0.95|4.222|null|1s2;453.65|1560|0.98|[He]2s1;1560|2742|1.57|[He]2s2;2349|4200|2.04|[He]2s2 2p1;3823|4098|2.55|[He]2s2 2p2;63.15|77.355|3.04|[He]2s2 2p3;54.36|90.188|3.44|[He]2s2 2p4;53.48|85.03|3.98|[He]2s2 2p5;24.56|27.104|null|[He]2s2 2p6;370.944|1156.09|0.93|[Ne]3s1;923|1363|1.31|[Ne]3s2;933.47|2743|1.61|[Ne]3s2 3p1;1687|3538|1.9|[Ne]3s2 3p2;317.3|553.7|2.19|[Ne]3s2 3p3;388.36|717.8|2.58|[Ne]3s2 3p4;171.6|239.11|3.16|[Ne]3s2 3p5;83.81|87.302|null|[Ne]3s2 3p6;336.7|1032|0.82|[Ar]4s1;1115|1757|1|[Ar]4s2;1814|3109|1.36|[Ar]3d1 4s2;1941|3560|1.54|[Ar]3d2 4s2;2183|3680|1.63|[Ar]3d3 4s2;2180|2944|1.66|[Ar]3d5 4s1;1519|2334|1.55|[Ar]3d5 4s2;1811|3134|1.83|[Ar]3d6 4s2;1768|3200|1.88|[Ar]3d7 4s2;1728|3003|1.91|[Ar]3d8 4s2;1357.77|2835|1.9|[Ar]3d10 4s1;692.68|1180|1.65|[Ar]3d10 4s2;302.9146|2673|1.81|[Ar]3d10 4s2 4p1;1211.4|3106|2.01|[Ar]3d10 4s2 4p2;1090|887|2.18|[Ar]3d10 4s2 4p3;494|958|2.55|[Ar]3d10 4s2 4p4;265.8|332|2.96|[Ar]3d10 4s2 4p5;115.78|119.93|3|[Ar]3d10 4s2 4p6;312.45|961|0.82|[Kr]5s1;1050|1655|0.95|[Kr]5s2;1799|3609|1.22|[Kr]4d1 5s2;2128|4682|1.33|[Kr]4d2 5s2;2750|5017|1.6|[Kr]4d4 5s1;2896|4912|2.16|[Kr]4d5 5s1;2430|4538|1.9|[Kr]4d5 5s2;2607|4423|2.2|[Kr]4d7 5s1;2237|3968|2.28|[Kr]4d8 5s1;1828.05|3236|2.2|[Kr]4d10;1234.93|2435|1.93|[Kr]4d10 5s1;594.22|1040|1.69|[Kr]4d10 5s2;429.7485|2345|1.78|[Kr]4d10 5s2 5p1;505.08|2875|1.96|[Kr]4d10 5s2 5p2;903.78|1908|2.05|[Kr]4d10 5s2 5p3;722.66|1261|2.1|[Kr]4d10 5s2 5p4;386.85|457.4|2.66|[Kr]4d10 5s2 5p5;161.4|165.051|2.6|[Kr]4d10 5s2 5p6;301.7|944|0.79|[Xe]6s1;1000|2118|0.89|[Xe]6s2;1193|3737|1.1|[Xe]5d1 6s2;1068|3716|1.12|[Xe]4f1 5d1 6s2;1208|3793|1.13|[Xe]4f3 6s2;1297|3347|1.14|[Xe]4f4 6s2;1315|3273|null|[Xe]4f5 6s2;1345|2067|1.17|[Xe]4f6 6s2;1099|1802|null|[Xe]4f7 6s2;1585|3546|1.2|[Xe]4f7 5d1 6s2;1629|3503|null|[Xe]4f9 6s2;1680|2840|1.22|[Xe]4f10 6s2;1734|2993|1.23|[Xe]4f11 6s2;1802|3141|1.24|[Xe]4f12 6s2;1818|2223|1.25|[Xe]4f13 6s2;1097|1469|null|[Xe]4f14 6s2;1925|3675|1.27|[Xe]4f14 5d1 6s2;2506|4876|1.3|[Xe]4f14 5d2 6s2;3290|5731|1.5|[Xe]4f14 5d3 6s2;3695|6203|2.36|[Xe]4f14 5d4 6s2;3459|5869|1.9|[Xe]4f14 5d5 6s2;3306|5285|2.2|[Xe]4f14 5d6 6s2;2719|4403|2.2|[Xe]4f14 5d7 6s2;2041.4|4098|2.28|[Xe]4f14 5d9 6s1;1337.33|3243|2.54|[Xe]4f14 5d10 6s1;234.321|629.88|2|[Xe]4f14 5d10 6s2;577|1746|1.62|[Xe]4f14 5d10 6s2 6p1;600.61|2022|2.33|[Xe]4f14 5d10 6s2 6p2;544.7|1837|2.02|[Xe]4f14 5d10 6s2 6p3;527|1235|2|[Xe]4f14 5d10 6s2 6p4;575|610|2.2|[Xe]4f14 5d10 6s2 6p5;202|211.5|2.2|[Xe]4f14 5d10 6s2 6p6;300|950|0.79|[Rn]7s1;973|2010|0.9|[Rn]7s2;1323|3471|1.1|[Rn]6d1 7s2;2115|5061|1.3|[Rn]6d2 7s2;1841|4300|1.5|[Rn]5f2 6d1 7s2;1405.3|4404|1.38|[Rn]5f3 6d1 7s2;917|4273|1.36|[Rn]5f4 6d1 7s2;912.5|3501|1.28|[Rn]5f6 7s2;1449|2880|1.13|[Rn]5f7 7s2;1613|3383|1.28|[Rn]5f7 6d1 7s2;1259|2900|1.3|[Rn]5f9 7s2;1173|1743|1.3|[Rn]5f10 7s2;1133|1269|1.3|[Rn]5f11 7s2;1800|null|1.3|[Rn]5f12 7s2;1100|null|1.3|[Rn]5f13 7s2;1100|null|1.3|[Rn]5f14 7s2;1900|null|1.3|[Rn]5f14 7s2 7p1;2400|5800|null|[Rn]5f14 6d2 7s2;null|null|null|[Rn]5f14 6d3 7s2;null|null|null|[Rn]5f14 6d4 7s2;null|null|null|[Rn]5f14 6d5 7s2;null|null|null|[Rn]5f14 6d6 7s2;null|null|null|[Rn]5f14 6d7 7s2;null|null|null|[Rn]5f14 6d8 7s2;null|null|null|[Rn]5f14 6d9 7s2;283|340|null|[Rn]5f14 6d10 7s2;700|1430|null|[Rn]5f14 6d10 7s2 7p1;200|380|null|[Rn]5f14 6d10 7s2 7p2;670|1400|null|[Rn]5f14 6d10 7s2 7p3;709|1085|null|[Rn]5f14 6d10 7s2 7p4;723|883|null|[Rn]5f14 6d10 7s2 7p5;325|450|null|[Rn]5f14 6d10 7s2 7p6";
+
+/** Index of the last element in each period, used to derive period numbers. */
+const PERIOD_ENDS = [2, 10, 18, 36, 54, 86, 118];
+
+const periodOf = (z: number) => PERIOD_ENDS.findIndex((end) => z <= end) + 1;
+
+const num = (v: string) => (v === "null" ? null : Number(v));
 
 // Full periodic table, 118 elements.
 const RAW_ELEMENTS =
   "H Hydrogen 1.008 nonmetal|He Helium 4.0026 noble gas|Li Lithium 6.94 alkali metal|Be Beryllium 9.0122 alkaline earth metal|B Boron 10.81 metalloid|C Carbon 12.011 nonmetal|N Nitrogen 14.007 nonmetal|O Oxygen 15.999 nonmetal|F Fluorine 18.998 halogen|Ne Neon 20.180 noble gas|Na Sodium 22.990 alkali metal|Mg Magnesium 24.305 alkaline earth metal|Al Aluminium 26.982 post-transition metal|Si Silicon 28.085 metalloid|P Phosphorus 30.974 nonmetal|S Sulfur 32.06 nonmetal|Cl Chlorine 35.45 halogen|Ar Argon 39.948 noble gas|K Potassium 39.098 alkali metal|Ca Calcium 40.078 alkaline earth metal|Sc Scandium 44.956 transition metal|Ti Titanium 47.867 transition metal|V Vanadium 50.942 transition metal|Cr Chromium 51.996 transition metal|Mn Manganese 54.938 transition metal|Fe Iron 55.845 transition metal|Co Cobalt 58.933 transition metal|Ni Nickel 58.693 transition metal|Cu Copper 63.546 transition metal|Zn Zinc 65.38 transition metal|Ga Gallium 69.723 post-transition metal|Ge Germanium 72.630 metalloid|As Arsenic 74.922 metalloid|Se Selenium 78.971 nonmetal|Br Bromine 79.904 halogen|Kr Krypton 83.798 noble gas|Rb Rubidium 85.468 alkali metal|Sr Strontium 87.62 alkaline earth metal|Y Yttrium 88.906 transition metal|Zr Zirconium 91.224 transition metal|Nb Niobium 92.906 transition metal|Mo Molybdenum 95.95 transition metal|Tc Technetium 98 transition metal|Ru Ruthenium 101.07 transition metal|Rh Rhodium 102.91 transition metal|Pd Palladium 106.42 transition metal|Ag Silver 107.87 transition metal|Cd Cadmium 112.41 transition metal|In Indium 114.82 post-transition metal|Sn Tin 118.71 post-transition metal|Sb Antimony 121.76 metalloid|Te Tellurium 127.60 metalloid|I Iodine 126.90 halogen|Xe Xenon 131.29 noble gas|Cs Caesium 132.91 alkali metal|Ba Barium 137.33 alkaline earth metal|La Lanthanum 138.91 lanthanide|Ce Cerium 140.12 lanthanide|Pr Praseodymium 140.91 lanthanide|Nd Neodymium 144.24 lanthanide|Pm Promethium 145 lanthanide|Sm Samarium 150.36 lanthanide|Eu Europium 151.96 lanthanide|Gd Gadolinium 157.25 lanthanide|Tb Terbium 158.93 lanthanide|Dy Dysprosium 162.50 lanthanide|Ho Holmium 164.93 lanthanide|Er Erbium 167.26 lanthanide|Tm Thulium 168.93 lanthanide|Yb Ytterbium 173.05 lanthanide|Lu Lutetium 174.97 lanthanide|Hf Hafnium 178.49 transition metal|Ta Tantalum 180.95 transition metal|W Tungsten 183.84 transition metal|Re Rhenium 186.21 transition metal|Os Osmium 190.23 transition metal|Ir Iridium 192.22 transition metal|Pt Platinum 195.08 transition metal|Au Gold 196.97 transition metal|Hg Mercury 200.59 transition metal|Tl Thallium 204.38 post-transition metal|Pb Lead 207.2 post-transition metal|Bi Bismuth 208.98 post-transition metal|Po Polonium 209 metalloid|At Astatine 210 halogen|Rn Radon 222 noble gas|Fr Francium 223 alkali metal|Ra Radium 226 alkaline earth metal|Ac Actinium 227 actinide|Th Thorium 232.04 actinide|Pa Protactinium 231.04 actinide|U Uranium 238.03 actinide|Np Neptunium 237 actinide|Pu Plutonium 244 actinide|Am Americium 243 actinide|Cm Curium 247 actinide|Bk Berkelium 247 actinide|Cf Californium 251 actinide|Es Einsteinium 252 actinide|Fm Fermium 257 actinide|Md Mendelevium 258 actinide|No Nobelium 259 actinide|Lr Lawrencium 266 actinide|Rf Rutherfordium 267 transition metal|Db Dubnium 268 transition metal|Sg Seaborgium 269 transition metal|Bh Bohrium 270 transition metal|Hs Hassium 269 transition metal|Mt Meitnerium 278 unknown|Ds Darmstadtium 281 unknown|Rg Roentgenium 282 unknown|Cn Copernicium 285 transition metal|Nh Nihonium 286 unknown|Fl Flerovium 289 post-transition metal|Mc Moscovium 290 unknown|Lv Livermorium 293 unknown|Ts Tennessine 294 halogen|Og Oganesson 294 noble gas";
 
+const PHYSICAL = RAW_PHYSICAL.split(";");
+
 export const ELEMENTS: Element[] = RAW_ELEMENTS.split("|").map((row, i) => {
   const parts = row.split(" ");
+  const [melt, boil, en, config] = (PHYSICAL[i] ?? "null|null|null|—").split("|");
   return {
     z: i + 1,
     sym: parts[0],
     name: parts[1],
     mass: parseFloat(parts[2]),
     group: parts.slice(3).join(" "),
+    config,
+    melt: num(melt),
+    boil: num(boil),
+    electroneg: num(en),
+    period: periodOf(i + 1),
   };
 });
 

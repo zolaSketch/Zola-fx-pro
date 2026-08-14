@@ -49,6 +49,9 @@ interface JarvisState {
   timers: Timer[];
   notes: Note[];
   suit: SuitState;
+  /** Radar scale in km, and whether contacts are real aircraft. */
+  radarRadiusKm: number;
+  radarLive: boolean;
   suitMark: string;
   suitProgress: number;
   nowPlaying: string | null;
@@ -83,6 +86,8 @@ export const useJarvis = create<JarvisState>()(
       timers: [],
       notes: [],
       suit: "stowed",
+      radarRadiusKm: 150,
+      radarLive: false,
       suitMark: "LXXXV",
       suitProgress: 0,
       nowPlaying: null,
@@ -173,11 +178,15 @@ export const useJarvis = create<JarvisState>()(
               const pull = (x.target - x.value) * 0.18;
               return { ...x, value: clamp(x.value + pull + noise, 0, 100) };
             }),
-            threats: s.threats.map((t) => ({
-              ...t,
-              bearing: (t.bearing + (Math.random() * 1.6 - 0.4) + 360) % 360,
-              distance: clamp(t.distance + (Math.random() - 0.5) * 0.012, 0.12, 0.95),
-            })),
+            // Simulated contacts drift to look alive; real aircraft must not
+            // be moved, since their positions are measured.
+            threats: s.radarLive
+              ? s.threats
+              : s.threats.map((t) => ({
+                  ...t,
+                  bearing: (t.bearing + (Math.random() * 1.6 - 0.4) + 360) % 360,
+                  distance: clamp(t.distance + (Math.random() - 0.5) * 0.012, 0.12, 0.95),
+                })),
           };
         });
       },
@@ -201,7 +210,7 @@ export const useJarvis = create<JarvisState>()(
             level: r > 0.82 ? "high" : r > 0.5 ? "medium" : "low",
           };
         });
-        set({ threats });
+        set({ threats, radarLive: false, radarRadiusKm: 12 });
         return threats;
       },
 
@@ -338,6 +347,83 @@ export const useJarvis = create<JarvisState>()(
                 ),
               });
             });
+            break;
+          }
+          case "search_documents": {
+            const { query } = call.args as { query: string };
+            void (async () => {
+              const { search } = await import("@/lib/rag");
+              const hits = await search(query, 4);
+              if (!hits.length) {
+                s.push("jarvis", "I find nothing on that in your documents, sir.", {
+                  tone: "neutral",
+                  meta: ["Upload files from the INTEL tab to give me something to read."],
+                });
+                return;
+              }
+              s.push("jarvis", hits[0].text.slice(0, 240), {
+                tone: "ok",
+                meta: hits.map(
+                  (h) => `${h.docName} · passage ${h.index + 1} · ${h.text.slice(0, 110)}…`,
+                ),
+              });
+            })();
+            break;
+          }
+          case "air_traffic": {
+            const { radiusKm } = call.args as { radiusKm: number };
+            s.push("system", "", {
+              meta: ["ACQUIRING POSITION…"],
+              tone: "neutral",
+            });
+
+            void (async () => {
+              try {
+                const [{ getPosition }, flights] = await Promise.all([
+                  import("@/lib/capabilities/device"),
+                  import("@/lib/capabilities/flights"),
+                ]);
+
+                const pos = await getPosition();
+                const { latitude: lat, longitude: lon } = pos.coords;
+
+                const list = await flights.getAircraftNearby({ lat, lon, radiusKm });
+                const { summary, meta } = flights.describeTraffic(list, radiusKm);
+
+                // Plot real aircraft on the radar. `distance` is normalised
+                // 0-1 against the search radius, which is how Radar draws it.
+                set({
+                  threats: list.slice(0, 24).map((a) => ({
+                    id: a.id,
+                    label: a.callsign,
+                    bearing: a.bearingDeg,
+                    distance: clamp(a.distanceKm / radiusKm, 0.05, 0.98),
+                    level: flights.proximityLevel(a.distanceKm),
+                  })),
+                  radarRadiusKm: radiusKm,
+                  radarLive: true,
+                });
+
+                s.push("jarvis", summary, {
+                  tone: list.length ? "ok" : "neutral",
+                  meta: [
+                    `POSITION ... ${lat.toFixed(3)}, ${lon.toFixed(3)}`,
+                    ...meta,
+                  ],
+                });
+              } catch (err) {
+                const e = err as { code?: number; message?: string };
+                const denied = e?.code === 1;
+                s.push("jarvis", denied
+                  ? "I need location access to scan the skies, sir. Permission was refused."
+                  : "I could not reach the flight network, sir.", {
+                  tone: "warn",
+                  meta: denied
+                    ? ["Enable location for this site, then try again."]
+                    : [String(e?.message ?? err)],
+                });
+              }
+            })();
             break;
           }
           case "read_device": {

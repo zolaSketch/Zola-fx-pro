@@ -120,7 +120,10 @@ const RULES: Rule[] = [
     test: (s) =>
       has(s, "power", "reactor", "divert", "output", "energy", "juice") &&
       !has(s, "power down", "shut", "power of", "powers of", "raised to") &&
-      !/\bto the power\b/.test(s),
+      !/\bto the power\b/.test(s) &&
+      // "what did i write about the reactor" is a retrieval question that
+      // merely mentions a subsystem, not a command to change it.
+      !/\b(what did i|my notes?|my documents?|my files?|search my)\b/.test(s),
     build: (s) => {
       const n = extractNumber(s);
       if (n === null) {
@@ -148,6 +151,20 @@ const RULES: Rule[] = [
         { name: "set_power", args: { level: 15 } },
       ],
     }),
+  },
+
+  // ---- live air traffic (real ADS-B) -----------------------------------
+  // Declared before the simulated sweep so "what aircraft are near me"
+  // reaches the real radar rather than the fictional threat matrix.
+  {
+    id: "traffic",
+    test: (s) =>
+      has(s, "aircraft", "airplane", "aeroplane", "planes", "flights", "air traffic", "flying over", "in the sky"),
+    build: (s) => {
+      const m = s.match(/(\d{1,3})\s*(?:km|kilometre|kilometer)/);
+      const radiusKm = m ? Math.min(400, Math.max(5, parseInt(m[1], 10))) : 150;
+      return { reply: "", calls: [{ name: "air_traffic", args: { radiusKm } }] };
+    },
   },
 
   // ---- scanning --------------------------------------------------------
@@ -396,6 +413,23 @@ const RULES: Rule[] = [
       // Preserve the user's wording for speech.
       const spoken = s.replace(/^.*?(calculate|compute|solve|what is|what's|how much is)\s*/i, "").replace(/[?.]+$/, "").trim();
       return { reply: "", calls: [{ name: "calculate", args: { expression, spoken } }] };
+    },
+  },
+
+  // ---- personal documents (on-device retrieval) -------------------------
+  {
+    id: "documents",
+    test: (s) =>
+      has(s, "my notes", "my document", "my documents", "my files", "in my file",
+          "search my", "my project notes") ||
+      /\bwhat did i (write|say|note)\b/.test(s),
+    build: (s) => {
+      const query = s
+        .replace(/^.*?(search my|in my|what did i write about|about)\s*/i, "")
+        .replace(/\b(notes?|documents?|files?)\b/g, "")
+        .replace(/[?]+$/, "")
+        .trim();
+      return { reply: "", calls: [{ name: "search_documents", args: { query: query || s } }] };
     },
   },
 

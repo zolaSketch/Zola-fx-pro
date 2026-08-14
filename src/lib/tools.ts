@@ -75,6 +75,19 @@ export const recallSchema = z.object({
 
 export const deviceSchema = z.object({});
 
+export const docSearchSchema = z.object({
+  query: z.string().describe("What to look for in the user's uploaded documents."),
+});
+
+export const trafficSchema = z.object({
+  radiusKm: z
+    .number()
+    .min(5)
+    .max(400)
+    .default(150)
+    .describe("Search radius around the user's position, in kilometres."),
+});
+
 /* ---------------------------------------------------------------- server */
 
 export const weatherSchema = z.object({
@@ -118,6 +131,8 @@ export const TOOL_SCHEMAS = {
   remember: rememberSchema,
   recall: recallSchema,
   read_device: deviceSchema,
+  air_traffic: trafficSchema,
+  search_documents: docSearchSchema,
   // server / real work
   get_weather: weatherSchema,
   web_lookup: searchSchema,
@@ -150,6 +165,10 @@ export const TOOL_DESCRIPTIONS: Record<ToolName, string> = {
   recall: "Search long-term memory for previously stored facts.",
   read_device:
     "Read real device telemetry: battery, network, memory, CPU cores, frame rate.",
+  air_traffic:
+    "Scan for real aircraft near the user using live ADS-B data, and plot them on the threat radar.",
+  search_documents:
+    "Search the user's own uploaded documents and quote the relevant passage.",
   get_weather: "Get the real current weather and 3-day forecast for a location.",
   web_lookup:
     "Look up real factual information from Wikipedia and other knowledge bases.",

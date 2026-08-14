@@ -14,9 +14,15 @@ const LEVEL = {
 export function ThreatPanel() {
   const threats = useJarvis((s) => s.threats);
   const runTool = useJarvis((s) => s.runTool);
+  const live = useJarvis((s) => s.radarLive);
+  const radiusKm = useJarvis((s) => s.radarRadiusKm);
 
   return (
-    <Panel title="THREAT MATRIX" badge={`${threats.length} CONTACTS`} bodyClassName="flex flex-col gap-2">
+    <Panel
+      title={live ? "AIR TRAFFIC" : "THREAT MATRIX"}
+      badge={live ? `LIVE · ${threats.length} · ${radiusKm}km` : `${threats.length} CONTACTS`}
+      bodyClassName="flex flex-col gap-2"
+    >
       <Radar threats={threats} className="mx-auto max-w-[200px]" />
 
       <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto">
@@ -27,7 +33,7 @@ export function ThreatPanel() {
           >
             <span className="truncate text-hud-200/85">{t.label}</span>
             <span className="shrink-0 tabular-nums text-hud-400/70">
-              {t.bearing.toFixed(0)}° · {(t.distance * 12).toFixed(1)}km
+              {t.bearing.toFixed(0)}° · {(t.distance * radiusKm).toFixed(t.distance * radiusKm < 10 ? 1 : 0)}km
             </span>
             <span
               className={cn(
@@ -41,12 +47,20 @@ export function ThreatPanel() {
         ))}
       </ul>
 
-      <button
-        onClick={() => runTool({ name: "scan_threats", args: { focus: "all" } })}
-        className="shrink-0 rounded-sm border border-hud-300/35 bg-hud-500/5 py-1.5 font-display text-[9px] tracking-[0.22em] text-hud-200 transition hover:bg-hud-400/15 hover:text-white"
-      >
-        INITIATE SWEEP
-      </button>
+      <div className="grid shrink-0 grid-cols-2 gap-1.5">
+        <button
+          onClick={() => runTool({ name: "air_traffic", args: { radiusKm: 150 } })}
+          className="min-h-9 rounded-sm border border-ok-hud/40 bg-ok-hud/10 py-1.5 font-display text-[9px] tracking-[0.16em] text-ok-hud transition hover:bg-ok-hud/20"
+        >
+          LIVE AIRCRAFT
+        </button>
+        <button
+          onClick={() => runTool({ name: "scan_threats", args: { focus: "all" } })}
+          className="min-h-9 rounded-sm border border-hud-300/35 bg-hud-500/5 py-1.5 font-display text-[9px] tracking-[0.16em] text-hud-200 transition hover:bg-hud-400/15 hover:text-white"
+        >
+          SIMULATE
+        </button>
+      </div>
     </Panel>
   );
 }
