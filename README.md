@@ -36,6 +36,40 @@ Click the orb (or press `Ctrl+Space`) and say:
 
 To enable the LLM: `cp .env.example .env.local` and add your key.
 
+**Any OpenAI-compatible provider works** — set `OPENAI_BASE_URL` (it must end
+in `/v1`) and `JARVIS_MODEL`:
+
+| Provider | `OPENAI_BASE_URL` | Example model |
+| --- | --- | --- |
+| OpenAI | *(leave blank)* | `gpt-4o-mini` |
+| OpenCode Zen | `https://opencode.ai/zen/v1` | `claude-sonnet-4-5` |
+| OpenRouter | `https://openrouter.ai/api/v1` | `anthropic/claude-sonnet-4` |
+| Groq | `https://api.groq.com/openai/v1` | `llama-3.3-70b-versatile` |
+| Ollama (local) | `http://localhost:11434/v1` | `llama3.1` |
+
+### Is it connected? → `/api/health`
+
+Open **http://localhost:3000/api/health** for a one-glance diagnosis. It lists
+the models your key can see, performs a real chat completion, and names the
+exact fault when something is wrong — missing key, bad base URL, unknown model
+id, rate limit, or blocked egress.
+
+```jsonc
+{
+  "brain": "llm (with local fallback)",
+  "baseURL": "https://opencode.ai/zen/v1",
+  "model": "claude-sonnet-4-5",
+  "checks": {
+    "models": { "ok": true, "sample": ["claude-sonnet-4-5", "gpt-5-nano"] },
+    "chat":   { "ok": true, "reply": "online" }
+  },
+  "verdict": "LLM uplink operational."
+}
+```
+
+If the verdict is not `operational`, JARVIS simply keeps running on local
+cognition — nothing breaks.
+
 ### On your phone
 
 The HUD is fully responsive and installable as a PWA.
