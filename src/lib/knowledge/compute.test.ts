@@ -234,3 +234,27 @@ describe("dice", () => {
     expect(rollDice("hello")).toBeNull();
   });
 });
+
+describe("edge cases found by live auditing", () => {
+  it("does not call 1, 0 or negatives composite", () => {
+    // isPrime is correct; the provider previously reported "1 is composite".
+    expect(isPrime(1)).toBe(false);
+    expect(isPrime(0)).toBe(false);
+    expect(isPrime(-7)).toBe(false);
+    // A unit has no prime factorisation.
+    expect(factorise(1)).toEqual([]);
+    expect(factorise(0)).toEqual([]);
+  });
+
+  it("honours a one-sided die instead of promoting it to d2", () => {
+    const r = rollDice("100d1")!;
+    expect(r.notation).toBe("100d1");
+    expect(r.rolls.every((v) => v === 1)).toBe(true);
+    expect(r.total).toBe(100);
+  });
+
+  it("still clamps absurd dice", () => {
+    expect(rollDice("9999d6")!.rolls.length).toBeLessThanOrEqual(100);
+    expect(rollDice("1d99999")).not.toBeNull();
+  });
+});

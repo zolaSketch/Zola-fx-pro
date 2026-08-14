@@ -90,6 +90,10 @@ export const searchSchema = z.object({
 
 export const calcSchema = z.object({
   expression: z.string().describe("A mathematical expression, e.g. '(12*8)/3 + sqrt(16)'."),
+  spoken: z
+    .string()
+    .optional()
+    .describe("Optional original phrasing, read aloud instead of the normalised expression."),
 });
 
 export const timeSchema = z.object({

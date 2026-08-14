@@ -47,7 +47,10 @@ export async function runServerTool(
 ): Promise<CapabilityResult> {
   switch (name) {
     case "calculate":
-      return calculate(String(args.expression ?? ""));
+      return calculate(
+        String(args.expression ?? ""),
+        args.spoken ? String(args.spoken) : undefined,
+      );
     case "get_time":
       return getTime(String(args.timezone ?? "local"));
     case "get_weather":

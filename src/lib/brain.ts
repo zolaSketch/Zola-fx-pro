@@ -348,7 +348,9 @@ const RULES: Rule[] = [
       /\b(base64|sha-?\d+|hash)\b/.test(s) ||
       /#[0-9a-f]{3,6}\b/.test(s) ||
       /\b(moon phase|full moon|sunrise|sunset|day length|solar noon)\b/.test(s) ||
-      /\b(word count|readability|reading time)\b/.test(s),
+      /\b(word count|readability|reading time)\b/.test(s) ||
+      (/\b(distance|how far|bearing)\b/.test(s) &&
+        (s.match(/-?\d+\.\d+/g) ?? []).length >= 4),
     build: (s) => ({ reply: "", calls: [{ name: "web_lookup", args: { query: s } }] }),
   },
 
@@ -385,10 +387,15 @@ const RULES: Rule[] = [
         .replace(/\b(times|multiplied by)\b/g, "*").replace(/\bdivided by\b/g, "/")
         .replace(/\bsquared\b/g, "^2").replace(/\bcubed\b/g, "^3")
         .replace(/\s*(?:to the power of|raised to(?: the power of)?)\s*/g, "^")
+        // "15% of 240" and "15 percent of 240" both mean 15/100*240.
+        .replace(/(\d+(?:\.\d+)?)\s*(?:%|percent)\s+of\b/gi, "$1/100*")
         .replace(/\bpercent of\b/g, "/100*")
+        .replace(/\bof\b/g, "*")
         .replace(/[?.]+$/, "")
         .trim();
-      return { reply: "", calls: [{ name: "calculate", args: { expression } }] };
+      // Preserve the user's wording for speech.
+      const spoken = s.replace(/^.*?(calculate|compute|solve|what is|what's|how much is)\s*/i, "").replace(/[?.]+$/, "").trim();
+      return { reply: "", calls: [{ name: "calculate", args: { expression, spoken } }] };
     },
   },
 

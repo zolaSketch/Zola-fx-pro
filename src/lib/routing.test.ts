@@ -84,6 +84,17 @@ describe("intent routing precedence", () => {
     expectTool("divert 80% to the reactor", "set_power");
   });
 
+  it("handles percentage-of phrasing as arithmetic", () => {
+    // "15% of 240" previously reached the calculator as a literal "of".
+    const { calls } = understand("how much is 15% of 240");
+    expect(calls[0].name).toBe("calculate");
+    expect((calls[0].args as { expression: string }).expression).not.toMatch(/\bof\b/);
+  });
+
+  it("routes coordinate distance queries to knowledge", () => {
+    expectTool("distance between 51.5 -0.12 and 48.85 2.35", "web_lookup");
+  });
+
   it("routes definitions to knowledge", () => {
     expectTool("define serendipity", "web_lookup");
     expectTool("what does ubiquitous mean", "web_lookup");

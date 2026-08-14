@@ -205,11 +205,14 @@ function pretty(n: number): string {
   return r.toLocaleString(undefined, { maximumSignificantDigits: 12 });
 }
 
-export function calculate(expression: string): CapabilityResult {
+export function calculate(expression: string, spoken?: string): CapabilityResult {
   try {
     const v = evaluate(expression);
-    return ok(`${expression.trim()} is ${pretty(v)}, sir.`, [
-      `EXPRESSION . ${expression.trim()}`,
+    // Speak the phrasing the user actually used; the normalised expression is
+    // shown on the HUD. Reading "15/100* 240" aloud is unpleasant.
+    const said = (spoken ?? expression).trim().replace(/\s+/g, " ");
+    return ok(`${said} is ${pretty(v)}, sir.`, [
+      `EXPRESSION . ${expression.trim().replace(/\s+/g, " ")}`,
       `RESULT ..... ${pretty(v)}`,
     ], v);
   } catch (e) {

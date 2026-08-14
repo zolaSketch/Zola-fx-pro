@@ -97,6 +97,22 @@ const numberTheory: Provider = {
     }
 
     if (/prime/.test(s)) {
+      // 1 is a unit, and 0 and negatives are neither prime nor composite.
+      // Claiming "1 is composite" is simply false, so they are handled apart.
+      if (n < 2) {
+        const why =
+          n === 1
+            ? "One is a unit: neither prime nor composite."
+            : n === 0
+              ? "Zero is neither prime nor composite."
+              : "Primality is defined for integers greater than one.";
+        return {
+          summary: `No, sir. ${why}`,
+          meta: [`NUMBER ..... ${n}`, `PRIME ...... no`, `CLASS ...... ${n === 1 ? "unit" : "not applicable"}`],
+          source: "Number theory",
+          confidence: 0.96,
+        };
+      }
       const p = isPrime(n);
       const f = p ? [] : factorise(n);
       return {
@@ -334,7 +350,8 @@ const distanceProvider: Provider = {
   name: "Geodesy",
   domains: ["general", "science"],
   offline: true,
-  canHandle: (q) => /\b(distance|how far)\b.*\b(between|from)\b/i.test(q) && /-?\d+\.\d+/.test(q),
+  canHandle: (q) =>
+    /\b(distance|how far|bearing)\b/i.test(q) && (q.match(/-?\d+\.\d+/g) ?? []).length >= 4,
   async run(q) {
     const nums = (q.match(/-?\d+\.\d+/g) ?? []).map(Number);
     if (nums.length < 4) return null;

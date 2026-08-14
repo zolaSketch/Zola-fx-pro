@@ -385,7 +385,9 @@ export function rollDice(spec: string): { rolls: number[]; total: number; notati
   const m = spec.toLowerCase().match(/(\d{0,3})\s*d\s*(\d{1,4})\s*([+-]\s*\d{1,4})?/);
   if (!m) return null;
   const count = Math.min(100, Math.max(1, parseInt(m[1] || "1", 10)));
-  const sides = Math.min(1000, Math.max(2, parseInt(m[2], 10)));
+  // A d1 is valid (always rolls 1); silently promoting it to d2 produced
+  // wrong totals for "100d1".
+  const sides = Math.min(1000, Math.max(1, parseInt(m[2], 10)));
   const mod = m[3] ? parseInt(m[3].replace(/\s/g, ""), 10) : 0;
 
   const buf = new Uint32Array(count);
