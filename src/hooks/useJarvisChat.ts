@@ -47,6 +47,15 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
           content: e.text,
         }));
 
+      // Surface relevant long-term memories so the model can use them.
+      let memories: string[] = [];
+      try {
+        const { recall } = await import("@/lib/memory");
+        memories = (await recall(clean, 5)).map((m) => m.text);
+      } catch {
+        /* memory unavailable — proceed without it */
+      }
+
       let replyId: string | null = null;
       let full = "";
       let spokenUpTo = 0;
@@ -77,7 +86,10 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: [...history, { role: "user", content: clean }] }),
+          body: JSON.stringify({
+            messages: [...history, { role: "user", content: clean }],
+            memories,
+          }),
           signal: ac.signal,
         });
         if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -97,7 +109,15 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
           for (const line of lines) {
             const trimmed = line.trim();
             if (!trimmed) continue;
-            let evt: { type: string; value?: string; name?: string; args?: unknown; engine?: string };
+            let evt: {
+              type: string;
+              value?: string;
+              name?: string;
+              args?: unknown;
+              engine?: string;
+              meta?: string[];
+              ok?: boolean;
+            };
             try {
               evt = JSON.parse(trimmed);
             } catch {
@@ -114,6 +134,14 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
               flushSentences();
             } else if (evt.type === "tool" && evt.name) {
               runTool({ name: evt.name, args: evt.args ?? {} } as ToolCall);
+            } else if (evt.type === "result") {
+              // Real server-side capability output — show the structured rows.
+              const meta = Array.isArray(evt.meta) ? evt.meta : [];
+              if (meta.length) {
+                push("system", "", { meta, tone: evt.ok === false ? "warn" : "ok" });
+              }
+            } else if (evt.type === "notice" && evt.value) {
+              push("system", "", { meta: [evt.value], tone: "warn" });
             } else if (evt.type === "done") {
               setEngine((evt.engine as "llm" | "local") ?? null);
             }

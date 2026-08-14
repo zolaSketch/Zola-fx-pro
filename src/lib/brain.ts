@@ -1,4 +1,4 @@
-import type { ToolCall, ToolName } from "./tools";
+import { TOOL_SCHEMAS, type ToolCall, type ToolName } from "./tools";
 
 /**
  * The offline brain.
@@ -295,16 +295,6 @@ const RULES: Rule[] = [
     },
   },
 
-  // ---- notes -----------------------------------------------------------
-  {
-    id: "note",
-    test: (s) => has(s, "note", "remember", "log this", "make a note", "take a memo"),
-    build: (s) => {
-      const text = s.replace(/^.*?(note|remember|log this|memo)[:\s]*/i, "").trim() || "Unspecified note";
-      return { reply: "Noted, sir.", calls: [{ name: "log_note", args: { text } }] };
-    },
-  },
-
   // ---- clear -----------------------------------------------------------
   {
     id: "clear",
@@ -312,27 +302,106 @@ const RULES: Rule[] = [
     build: () => ({ reply: "Transcript purged, sir.", calls: [{ name: "clear_log", args: {} }] }),
   },
 
-  // ---- time / date -----------------------------------------------------
+  // ---- time / date (real, timezone aware) ------------------------------
   {
     id: "time",
     test: (s) => has(s, "what time", "the time", "what day", "what's the date", "date today"),
-    build: () => {
-      const d = new Date();
+    build: (s) => {
+      const m = s.match(/\bin\s+([a-z\s/_-]{2,30})/);
+      const raw = m?.[1]?.trim();
+      const ZONES: Record<string, string> = {
+        tokyo: "Asia/Tokyo", japan: "Asia/Tokyo", london: "Europe/London",
+        uk: "Europe/London", paris: "Europe/Paris", berlin: "Europe/Berlin",
+        "new york": "America/New_York", nyc: "America/New_York",
+        "los angeles": "America/Los_Angeles", la: "America/Los_Angeles",
+        dubai: "Asia/Dubai", india: "Asia/Kolkata", delhi: "Asia/Kolkata",
+        sydney: "Australia/Sydney", moscow: "Europe/Moscow",
+        beijing: "Asia/Shanghai", china: "Asia/Shanghai",
+        addis: "Africa/Addis_Ababa", ethiopia: "Africa/Addis_Ababa",
+        nairobi: "Africa/Nairobi", cairo: "Africa/Cairo",
+      };
+      const timezone = raw ? (ZONES[raw] ?? raw) : "local";
+      return { reply: "", calls: [{ name: "get_time", args: { timezone } }] };
+    },
+  },
+
+  // ---- maths (real evaluation) -----------------------------------------
+  {
+    id: "calculate",
+    test: (s) =>
+      has(s, "calculate", "what is", "what's", "how much is", "compute", "solve") &&
+      /[0-9]/.test(s) &&
+      /[+\-*/^%]|\b(plus|minus|times|divided|squared|sqrt|percent of)\b/.test(s),
+    build: (s) => {
+      const expression = s
+        .replace(/^.*?(calculate|compute|solve|what is|what's|how much is)\s*/i, "")
+        .replace(/\bplus\b/g, "+").replace(/\bminus\b/g, "-")
+        .replace(/\b(times|multiplied by)\b/g, "*").replace(/\bdivided by\b/g, "/")
+        .replace(/\bsquared\b/g, "^2").replace(/\bcubed\b/g, "^3")
+        .replace(/\bpercent of\b/g, "/100*")
+        .replace(/[?.]+$/, "")
+        .trim();
+      return { reply: "", calls: [{ name: "calculate", args: { expression } }] };
+    },
+  },
+
+  // ---- memory (real, persistent) ---------------------------------------
+  {
+    id: "remember",
+    test: (s) => has(s, "remember that", "remember i", "note that", "don't forget", "make a note", "keep in mind"),
+    build: (s) => {
+      const text = s.replace(/^.*?(remember that|remember|note that|don't forget|make a note|keep in mind)[:\s]*/i, "").trim();
       return {
-        reply: `It is ${d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", hour12: false })} on ${d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}, sir.`,
-        calls: [],
+        reply: "Noted and stored, sir.",
+        calls: [{ name: "remember", args: { text: text || s, kind: "fact" } }],
+      };
+    },
+  },
+  {
+    id: "recall",
+    test: (s) => has(s, "what do you know about me", "what do you remember", "recall", "what did i tell you"),
+    build: (s) => {
+      const query = s.replace(/^.*?(remember|recall|know)\s*(about)?\s*/i, "").trim();
+      return { reply: "", calls: [{ name: "recall", args: { query: query || "everything" } }] };
+    },
+  },
+
+  // ---- real device telemetry -------------------------------------------
+  {
+    id: "device",
+    test: (s) => has(s, "battery", "device status", "system resources", "how fast", "frame rate", "connection speed", "my computer"),
+    build: () => ({ reply: "", calls: [{ name: "read_device", args: {} }] }),
+  },
+
+  // ---- weather (real data) ---------------------------------------------
+  {
+    id: "weather",
+    test: (s) => has(s, "weather", "forecast", "raining", "temperature outside", "how cold", "how hot"),
+    build: (s) => {
+      // "weather in Tokyo" / "what's the weather like in New York"
+      const m = s.match(/(?:in|for|at)\s+([a-z\s'-]{2,40})/);
+      const location = m?.[1]?.replace(/\b(today|tomorrow|now|please|right now)\b/g, "").trim() || "current";
+      return {
+        reply: "Checking conditions, sir.",
+        calls: [{ name: "get_weather", args: { location } }],
       };
     },
   },
 
-  // ---- weather ---------------------------------------------------------
+  // ---- knowledge lookup (real) -----------------------------------------
   {
-    id: "weather",
-    test: (s) => has(s, "weather", "forecast", "raining", "temperature outside", "how cold", "how hot"),
-    build: () => ({
-      reply: `Currently ${14 + Math.round(Math.random() * 12)} degrees with scattered cloud, sir. Flight conditions are favourable.`,
-      calls: [],
-    }),
+    id: "lookup",
+    test: (s) =>
+      /^(who|what|where|when|why|how)\b/.test(s) ||
+      has(s, "look up", "search for", "tell me about", "google"),
+    build: (s) => {
+      const query = s
+        .replace(/^(who|what|where|when|why|how)\s+(is|are|was|were|did|does|do)\s*/i, "")
+        .replace(/^.*?(look up|search for|tell me about|google)\s*/i, "")
+        .replace(/[?]+$/, "")
+        .trim();
+      return { reply: "", calls: [{ name: "web_lookup", args: { query: query || s } }] };
+    },
   },
 
   // ---- capability ------------------------------------------------------
@@ -371,18 +440,32 @@ const FALLBACKS = [
   "I could improvise, sir, but I suspect you would not enjoy the outcome.",
 ];
 
-/** Interpret an utterance into a spoken reply plus zero or more tool calls. */
+/**
+ * Interpret an utterance into a spoken reply plus zero or more tool calls.
+ *
+ * Rules are ordered most-specific first; the trailing `lookup` rule is a greedy
+ * catch-all for question words, so it must stay near the end or it will
+ * swallow weather, time and arithmetic queries.
+ *
+ * A rule may return an empty reply when a real capability will supply the
+ * spoken text (its result replaces the reply upstream). `understand` itself
+ * still guarantees a non-empty reply when there is nothing to run.
+ */
 export function understand(raw: string): Understanding {
   const s = raw.trim().toLowerCase();
   if (!s) return { reply: "Sir?", calls: [] };
 
   for (const rule of RULES) {
-    if (rule.test(s)) return rule.build(s);
+    if (!rule.test(s)) continue;
+    const out = rule.build(s);
+    // Only a rule that actually dispatches work may stay silent.
+    if (!out.reply.trim() && out.calls.length === 0) {
+      return { reply: pick(FALLBACKS), calls: [] };
+    }
+    return out;
   }
   return { reply: pick(FALLBACKS), calls: [] };
 }
 
-export const KNOWN_TOOLS: ToolName[] = [
-  "set_power", "scan_threats", "set_subsystem", "run_protocol", "suit_control",
-  "set_status", "play_music", "start_timer", "log_note", "run_diagnostics", "clear_log",
-];
+/** Derived from the schema map so it can never drift out of sync. */
+export const KNOWN_TOOLS = Object.keys(TOOL_SCHEMAS) as ToolName[];

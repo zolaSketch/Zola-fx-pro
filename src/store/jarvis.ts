@@ -32,6 +32,7 @@ export interface Note {
   id: string;
   text: string;
   at: number;
+  kind: "fact" | "preference" | "event" | "note";
 }
 
 export type SuitState = "stowed" | "deploying" | "deployed" | "retracting";
@@ -292,12 +293,17 @@ export const useJarvis = create<JarvisState>()(
             meta([`TIMER · ${label} · ${seconds}s`]);
             break;
           }
-          case "log_note": {
-            const { text } = call.args as { text: string };
+          case "remember": {
+            const { text, kind } = call.args as { text: string; kind?: Note["kind"] };
             set((st) => ({
-              notes: [{ id: nextId(), text, at: Date.now() }, ...st.notes].slice(0, 50),
+              notes: [
+                { id: nextId(), text, at: Date.now(), kind: kind ?? "fact" },
+                ...st.notes,
+              ].slice(0, 50),
             }));
-            meta([`NOTE RECORDED · ${text}`]);
+            // Mirror into durable, searchable long-term memory.
+            void import("@/lib/memory").then((m) => m.remember(text, kind ?? "fact"));
+            meta([`MEMORY STORED · ${text}`]);
             break;
           }
           case "run_diagnostics": {
@@ -310,6 +316,57 @@ export const useJarvis = create<JarvisState>()(
                 ? [...rows, "NANO-LATTICE ..... INTACT", "ENCRYPTION ....... AES-256-GCM"]
                 : rows,
             );
+            break;
+          }
+          case "recall": {
+            const { query } = call.args as { query: string };
+            void import("@/lib/memory").then(async (m) => {
+              const hits =
+                query === "everything"
+                  ? (await m.allMemories()).slice(0, 8)
+                  : await m.recall(query, 6);
+              if (!hits.length) {
+                s.push("jarvis", "I have nothing on record about that, sir.", {
+                  tone: "neutral",
+                });
+                return;
+              }
+              s.push("jarvis", `I recall ${hits.length} relevant item${hits.length > 1 ? "s" : ""}, sir.`, {
+                tone: "ok",
+                meta: hits.map(
+                  (h) => `${new Date(h.at).toLocaleDateString()} · ${h.text}`,
+                ),
+              });
+            });
+            break;
+          }
+          case "read_device": {
+            void (async () => {
+              const d = await import("@/lib/capabilities/device");
+              const [battery, statics] = [await d.readBattery(), d.readStatic()];
+              const net = d.readNetwork();
+              const mem = d.readMemory();
+              const rows = [
+                battery
+                  ? `BATTERY .... ${battery.level.toFixed(0)}%${battery.charging ? " (charging)" : ""}`
+                  : "BATTERY .... unavailable",
+                net
+                  ? `NETWORK .... ${net.type} · ${net.downlink} Mb/s · ${net.rtt} ms RTT`
+                  : `NETWORK .... ${navigator.onLine ? "online" : "offline"}`,
+                mem
+                  ? `MEMORY ..... ${mem.usedMB.toFixed(0)} / ${mem.limitMB.toFixed(0)} MB (${mem.percent.toFixed(0)}%)`
+                  : "MEMORY ..... unavailable",
+                `CPU CORES .. ${statics.cores ?? "unknown"}`,
+                statics.screen
+                  ? `DISPLAY .... ${statics.screen.w}×${statics.screen.h} @ ${statics.screen.dpr}x`
+                  : "DISPLAY .... unknown",
+                `PLATFORM ... ${statics.platform ?? "unknown"}`,
+              ];
+              const spoken = battery
+                ? `Battery at ${battery.level.toFixed(0)} percent${battery.charging ? " and charging" : ""}, sir. ${statics.cores ?? "Unknown"} cores available.`
+                : "Here are your device readings, sir.";
+              s.push("jarvis", spoken, { tone: "ok", meta: rows });
+            })();
             break;
           }
           case "clear_log":

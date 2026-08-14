@@ -4,100 +4,124 @@
 Say *"Jarvis…"* out loud and he wakes, listens, answers in a British butler's
 voice, and actually operates the interface in front of you.
 
----
-
-## The important part: he works like the films
-
-| Film behaviour                        | How it works here                                                        |
-| ------------------------------------- | ------------------------------------------------------------------------ |
-| Tony says "Jarvis…" and he responds   | Continuous speech recognition with **wake-word gating**                   |
-| Jarvis talks back                     | Queued speech synthesis, British male voice, speaks **while** text streams |
-| "Divert power to thrusters" *happens* | Real **tool calling** — the LLM drives the HUD, it does not just describe it |
-| Suit assembles around him             | **3D nano-lattice hologram** that assembles piece by piece (WebGL)        |
-| Dry, unflappable wit                  | Character-locked system prompt; never breaks role                         |
-
-He never says "I can't do that." With no API key he runs on a built-in intent
-engine and **every single tool still works**.
+He does **real work**: live weather, real knowledge lookup, exact arithmetic,
+genuine device telemetry, and memory that persists across sessions.
 
 ---
 
-## Getting started
+## Quick start
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+cp .env.example .env.local     # add OPENAI_API_KEY for the LLM brain
+npm run dev                    # http://localhost:3000
 ```
 
-Then either **type** a directive or click the orb / press `Ctrl+Space` and say:
+Click the orb (or press `Ctrl+Space`) and say:
 
-> "**Jarvis**, divert eighty percent to the reactor."
+> "**Jarvis**, what's the weather in Tokyo?"
 
-### Optional: a real LLM brain
+---
+
+## Real vs. simulated — an honest table
+
+This is a Stark-fantasy HUD, so some things are theatre. Here is exactly which
+is which.
+
+| Genuinely real                                          | Deliberately simulated        |
+| ------------------------------------------------------- | ----------------------------- |
+| Weather + 3-day forecast (Open-Meteo, live)              | Arc reactor output            |
+| Knowledge lookup (Wikipedia, DuckDuckGo)                 | Repulsors, thrusters, armour  |
+| Arithmetic (a real parser, exact results)                | Threat matrix contacts        |
+| Time in any IANA timezone                                | Suit deployment               |
+| Battery, network type, RTT, JS heap, CPU cores, live FPS | Stark protocols               |
+| Persistent memory with semantic recall (IndexedDB)       |                               |
+| Speech recognition and synthesis                         |                               |
+| LLM conversation with tool calling                       |                               |
+
+No invented figures are ever presented as real data. If a live source is
+unreachable, JARVIS says so in character rather than fabricating a number.
+
+---
+
+## The brain
+
+`/api/chat` streams newline-delimited JSON and runs one of two brains:
+
+- **With `OPENAI_API_KEY`** — a real tool-calling LLM. Server tools execute on
+  the server and their output is fed *back into the model*, so it reasons about
+  genuine data before replying.
+- **Without a key** — a deterministic intent engine. **Every tool still works**,
+  including the live network ones. He never degrades to "I can't do that."
+
+If the LLM is unreachable mid-request, the turn fails over to local cognition
+in ~2 seconds and the HUD shows a notice. It never hangs and never dead-ends.
+
+### Works with any OpenAI-compatible endpoint
+
+The route calls **Chat Completions** (not the newer Responses API), so
+`OPENAI_BASE_URL` can point at OpenAI, a corporate proxy, OpenRouter, or a
+local model server such as Ollama, LM Studio or vLLM:
 
 ```bash
-cp .env.example .env.local
-# add OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=http://localhost:11434/v1
+JARVIS_MODEL=llama3.1
 ```
 
-With a key, conversation is handled by a tool-calling model. Without one, the
-offline engine takes over. The transcript footer shows which is active
-(`engine · llm` or `engine · local`).
-
-| Script              | Purpose                       |
-| ------------------- | ----------------------------- |
-| `npm run dev`       | Dev server (Turbopack)        |
-| `npm run build`     | Production build              |
-| `npm run test`      | Vitest suite                  |
-| `npm run lint`      | ESLint + React Compiler rules |
-| `npm run typecheck` | `tsc --noEmit`                |
-
 ---
 
-## Voice control
+## Voice
 
-- **Wake word** — the mic runs continuously but only acts on speech after
+- **Wake word** — the mic runs continuously but only acts on speech following
   "jarvis", so ambient conversation is ignored.
-- **Self-hearing guard** — capture pauses while he speaks, so he never
-  transcribes his own voice.
-- **Auto-restart** — browsers end recognition sessions on silence; a
-  desired-state flag restarts it until you explicitly stop.
-- **Say just "Jarvis"** and he replies *"Yes, sir?"*.
+- **Self-hearing guard** — capture pauses while he speaks.
+- **Auto-restart** — browsers end recognition on silence; a desired-state flag
+  restarts it until you explicitly stop.
+- **Sentence streaming** — he begins speaking the first sentence while the rest
+  is still generating.
+- Say just **"Jarvis"** and he replies *"Yes, sir?"*
 
-Requires a Chromium-based browser (`webkitSpeechRecognition`). Where
-unsupported, the mic button disables itself and typing works unchanged.
-
----
-
-## What he can do
-
-Everything below is a **tool**, callable by voice, text, or the LLM.
-
-| Tool              | Say something like                        |
-| ----------------- | ----------------------------------------- |
-| `set_power`       | "divert 80% to the reactor"               |
-| `set_subsystem`   | "set repulsors to 60"                     |
-| `scan_threats`    | "scan the perimeter" / "anyone out there?" |
-| `suit_control`    | "suit up" · "deploy mark VII" · "retract"  |
-| `run_protocol`    | "house party protocol" · "lockdown"        |
-| `set_status`      | "red alert" · "stand down"                 |
-| `start_timer`     | "set a timer for 5 minutes"                |
-| `log_note`        | "make a note: buy more palladium"          |
-| `play_music`      | "play something"                           |
-| `run_diagnostics` | "status report" · "full diagnostics"       |
-| `clear_log`       | "clear the log"                            |
+Needs a Chromium-based browser for input. Where unsupported, the mic disables
+itself and typing is unaffected.
 
 ---
 
-## Interface
+## Tools
 
-- **Boot sequence** — staged startup with an igniting arc reactor (skippable).
-- **Voice orb** — canvas energy rings that react to mic amplitude, thinking and
-  speaking states.
-- **Arc reactor** — animated SVG core with counter-rotating rings and live output.
-- **Suit hologram** — WebGL wireframe armour that assembles from a scatter.
-- **Threat matrix** — radar sweep; contacts fade as the beam passes.
-- **Subsystems** — six gauges easing toward targets with live noise.
-- **Memory** — countdown timers and notes; notes persist across reloads.
+| Tool              | Try saying                             | Real?         |
+| ----------------- | -------------------------------------- | ------------- |
+| `get_weather`     | "what's the weather in Tokyo"          | ✅ live API   |
+| `web_lookup`      | "who is Nikola Tesla"                  | ✅ live API   |
+| `calculate`       | "what is 15 times 24 plus 7"           | ✅ exact      |
+| `get_time`        | "what time is it in Tokyo"             | ✅ real       |
+| `read_device`     | "what's my battery"                    | ✅ real       |
+| `remember`        | "remember that I take my coffee black" | ✅ persistent |
+| `recall`          | "what do you remember about me"        | ✅ semantic   |
+| `set_power`       | "divert 80% to the reactor"            | HUD           |
+| `set_subsystem`   | "set repulsors to 60"                  | HUD           |
+| `scan_threats`    | "scan the perimeter"                   | HUD           |
+| `suit_control`    | "suit up" · "deploy mark VII"          | HUD           |
+| `run_protocol`    | "house party protocol" · "lockdown"    | HUD           |
+| `set_status`      | "red alert" · "stand down"             | HUD           |
+| `start_timer`     | "set a timer for 5 minutes"            | HUD           |
+| `run_diagnostics` | "status report"                        | HUD           |
+
+---
+
+## Memory
+
+Facts persist in IndexedDB and are retrieved by **TF-IDF cosine similarity**
+over stop-word-filtered tokens, weighted by recency and reinforced on each
+successful recall.
+
+This runs entirely on-device: no embedding API, no key, no network. Recall
+works offline, and nothing you tell him leaves the machine unless you enable
+the LLM.
+
+```
+"remember that I take my coffee black"   → stored
+"how do I like my coffee?"               → recalls it, days later
+```
 
 ---
 
@@ -105,66 +129,79 @@ Everything below is a **tool**, callable by voice, text, or the LLM.
 
 ```
 src/
-├── app/
-│   ├── api/chat/route.ts    NDJSON streaming: LLM tools OR offline brain
-│   ├── layout.tsx           self-hosted fonts, metadata
-│   └── page.tsx
+├── app/api/chat/route.ts    NDJSON streaming; LLM tools OR offline brain
 ├── components/
 │   ├── core/                BootSequence, Dashboard, Terminal
 │   ├── hud/                 ArcReactor, Radar, VoiceOrb, SuitHologram, …
-│   └── panels/              StatusBar, Systems, Threat, Reactor, Suit, Timers
-├── hooks/                   useSpeech, useSpeechRecognition, useJarvisChat, useNow
-├── lib/                     tools (zod schemas), brain (intent engine), utils
+│   └── panels/              Systems, Threat, Reactor, Suit, Device, Timers
+├── hooks/                   useSpeech, useSpeechRecognition, useJarvisChat
+├── lib/
+│   ├── capabilities/        weather · search · calc · device  (real work)
+│   ├── tools.ts             zod schemas — the single source of truth
+│   ├── brain.ts             offline intent engine
+│   └── memory.ts            IndexedDB + semantic ranking
 └── store/                   jarvis (Zustand + persist)
 ```
 
 ### One contract, two brains
 
-`src/lib/tools.ts` holds zod schemas that are the single source of truth for
-three consumers: the LLM route (converted to AI SDK tools), the offline intent
-engine, and the client executor. Both brains emit the *same* tool-call shape, so
-the HUD behaves identically either way — and the test suite validates every
-offline call against the same schemas the LLM is bound to.
+`lib/tools.ts` holds zod schemas used by **four** consumers: the LLM route, the
+offline engine, the client executor, and the test suite. Both brains emit the
+same tool-call shape, so the HUD behaves identically either way — and tests
+validate every offline call against the schemas the LLM is bound to.
 
-### Streaming
+Tools are split by where they must run: **server tools** (network, computation)
+execute in the route so the model can reason about their results; **HUD tools**
+are forwarded to the browser, which owns that state.
 
-`/api/chat` emits newline-delimited JSON:
+---
 
-```jsonc
-{"type":"text","value":"Diverting "}      // spoken incrementally
-{"type":"tool","name":"set_power","args":{"level":80}}
-{"type":"done","engine":"local"}
-```
+## Testing
 
-The client appends text into the transcript live, dispatches tool calls to the
-store the moment they arrive, and speaks each **sentence** as it completes
-rather than waiting for the full reply.
+**94 tests.** Run with `npm test`.
+
+The suite is not decoration — it caught three real bugs during development:
+
+1. **Duration parsing** — `\b` after `minute` failed on the plural, so
+   "5 minutes" silently became 60 seconds.
+2. **Lexer whitespace** — stripping spaces up front fused `"1 2"` into `12`
+   instead of rejecting it.
+3. **Intent precedence** — the `lookup` rule matches any question word, so it
+   was shadowing weather, time and device queries. `routing.test.ts` now pins
+   that ordering so the regression cannot return.
+
+The calculator is a **recursive-descent parser, never `eval`**, because it
+receives untrusted input from voice and LLM output. 14 escape attempts
+(`process`, `require`, `constructor`, `__proto__`, IIFEs…) are tested and
+rejected.
+
+Network capabilities are tested against recorded response shapes, so CI does
+not depend on third-party uptime.
 
 ---
 
 ## Engineering notes
 
-- **Clean under the React Compiler.** No `setState` in effects, no ref writes
-  during render, no impure calls in render. The shared clock is an external
-  store (`useNow`) so SSR and client markup match exactly.
-- **Deterministic SSR.** Ambient particles use a seeded PRNG, so server and
-  client output are byte-identical — no hydration mismatch.
-- **Offline-safe fonts.** Self-hosted via `@fontsource-variable`; the build
-  never reaches out to Google Fonts.
-- **0 npm vulnerabilities.**
-- **Tested.** The Vitest suite caught a real bug during development: a `\b`
-  anchor after `minute` failed on the plural, so "5 minutes" silently became 60
-  seconds. Duration parsing is now pluralisation-aware and range-clamped.
-- **Graceful degradation everywhere.** No API key → offline brain. No
-  `speechSynthesis` → silent text. No `SpeechRecognition` → mic disabled,
-  typing unaffected. Network drop mid-stream → the turn fails safe with an
-  in-character message.
+- **Clean under the React Compiler** — no `setState` in effects, no ref writes
+  during render, no impure calls in render.
+- **Deterministic SSR** — seeded PRNG for ambient particles; no hydration
+  mismatch.
+- **0 npm vulnerabilities** (required upgrading `@ai-sdk/openai` to v4 to clear
+  a vulnerable `undici` chain).
+- **Offline-safe fonts** — self-hosted; the build never calls Google Fonts.
+- **Degrades everywhere** — no key, no speech APIs, no network, no WebGL, or a
+  dropped stream: each fails soft and in character.
+
+## Security
+
+`.env.local` is gitignored and never committed. **Rotate any key that has been
+pasted into a chat, issue tracker or shared terminal** — treat it as public.
 
 ---
 
 ## Roadmap
 
-- Persistent long-term memory with retrieval
-- Multi-turn tool chaining with follow-up questions
-- Live external data (real weather, calendar, news)
+- Calendar and email integration
 - Speaker identification for multi-user rooms
+- Vector embeddings for memory when a key is present
+- Home automation bridge (Matter / Home Assistant)
