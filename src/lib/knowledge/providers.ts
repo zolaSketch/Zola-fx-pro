@@ -7,6 +7,7 @@ import {
   type Provider,
 } from "./types";
 import { BODIES, CONSTANTS, ELEMENTS, convert, findBody, findConstant, findElement } from "./core";
+import { COMPUTED_PROVIDERS } from "./computed-providers";
 
 /* ======================================================= offline providers */
 
@@ -391,6 +392,9 @@ const duckduckgo: Provider = {
 
 /** Offline first (instant, always available), then network sources. */
 export const PROVIDERS: Provider[] = [
+  // Computed providers are exact and key-free; they claim narrowly via
+  // canHandle so they never shadow the general knowledge sources.
+  ...COMPUTED_PROVIDERS,
   conversionProvider,
   constantsProvider,
   elementProvider,

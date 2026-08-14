@@ -62,7 +62,8 @@ const has = (s: string, ...w: string[]) => w.some((x) => s.includes(x));
 
 interface Rule {
   id: string;
-  test: (s: string) => boolean;
+  /** `s` is lower-cased; `raw` preserves original case (Roman numerals). */
+  test: (s: string, raw: string) => boolean;
   build: (s: string) => Understanding;
 }
 
@@ -329,6 +330,28 @@ const RULES: Rule[] = [
     },
   },
 
+  // ---- computed knowledge (offline, exact) ------------------------------
+  // Dice, primes, bases, Roman numerals, colours, hashes, passwords, moon
+  // phase and text stats are all answered by computed providers behind
+  // web_lookup. Declared before `calculate` and `lookup` so numeric phrasing
+  // ("is 7919 prime", "roll 3d6") is not parsed as arithmetic or a search.
+  {
+    id: "computed",
+    test: (s, raw) =>
+      /\b(prime|factorise|factorize|factors of|gcd|lcm|hcf)\b/.test(s) ||
+      /\b(binary|hexadecimal|octal)\b/.test(s) ||
+      /\broman numerals?\b/.test(s) ||
+      /\b[MDCLXVI]{2,15}\b/.test(raw) ||
+      /\b\d{0,3}\s*d\s*\d{1,4}\b/.test(s) ||
+      /\b(roll|dice|flip a coin|coin toss|random number)\b/.test(s) ||
+      /\b(password|passphrase)\b/.test(s) ||
+      /\b(base64|sha-?\d+|hash)\b/.test(s) ||
+      /#[0-9a-f]{3,6}\b/.test(s) ||
+      /\b(moon phase|full moon|sunrise|sunset|day length|solar noon)\b/.test(s) ||
+      /\b(word count|readability|reading time)\b/.test(s),
+    build: (s) => ({ reply: "", calls: [{ name: "web_lookup", args: { query: s } }] }),
+  },
+
   // ---- unit conversion & knowledge domains (real) ----------------------
   // Placed before `calculate` so "convert 100 km to miles" is not parsed as
   // arithmetic, and before `lookup` so it is not sent to Wikipedia.
@@ -481,7 +504,7 @@ export function understand(raw: string): Understanding {
   if (!s) return { reply: "Sir?", calls: [] };
 
   for (const rule of RULES) {
-    if (!rule.test(s)) continue;
+    if (!rule.test(s, raw.trim())) continue;
     const out = rule.build(s);
     // Only a rule that actually dispatches work may stay silent.
     if (!out.reply.trim() && out.calls.length === 0) {

@@ -130,7 +130,7 @@ export function Terminal() {
     <div className="flex h-full min-h-0 flex-col">
       {/* voice orb header */}
       <div className="mb-2 flex shrink-0 items-center gap-3 border-b border-hud-400/15 pb-2">
-        <VoiceOrb mode={orbMode} className="h-16 w-16 shrink-0" onClick={mic.toggle} />
+        <VoiceOrb mode={orbMode} className="h-14 w-14 shrink-0 sm:h-16 sm:w-16" onClick={mic.toggle} />
         <div className="min-w-0 flex-1">
           <p className="font-display text-[9px] tracking-[0.24em] text-hud-300/70">
             {orbMode === "speaking"
@@ -260,13 +260,13 @@ export function Terminal() {
       </div>
 
       {/* suggestions */}
-      <div className="mt-3 flex shrink-0 flex-wrap gap-1.5">
+      <div className="mt-3 flex shrink-0 gap-1.5 overflow-x-auto pb-0.5 sm:flex-wrap sm:overflow-visible">
         {SUGGESTIONS.map((s) => (
           <button
             key={s}
             onClick={() => submit(s)}
             disabled={thinking}
-            className="rounded-sm border border-hud-400/20 bg-hud-500/5 px-2 py-1 font-display text-[9px] tracking-[0.12em] text-hud-300/75 transition hover:border-hud-300/50 hover:bg-hud-400/15 hover:text-hud-100 disabled:opacity-40"
+            className="shrink-0 whitespace-nowrap rounded-sm border border-hud-400/20 bg-hud-500/5 px-2 py-1.5 font-display text-[9px] tracking-[0.12em] text-hud-300/75 transition hover:border-hud-300/50 hover:bg-hud-400/15 hover:text-hud-100 disabled:opacity-40"
           >
             {s.toUpperCase()}
           </button>
@@ -289,8 +289,8 @@ export function Terminal() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           disabled={thinking}
-          placeholder={thinking ? "processing…" : "Speak or type your directive, sir…"}
-          className="min-w-0 flex-1 bg-transparent font-mono-hud text-[12.5px] text-hud-50 outline-none placeholder:text-hud-500/45 disabled:opacity-50"
+          placeholder={thinking ? "processing…" : "Speak or type, sir…"}
+          className="min-w-0 flex-1 bg-transparent font-mono-hud text-base text-hud-50 outline-none placeholder:text-hud-500/45 disabled:opacity-50 sm:text-[12.5px]"
           autoComplete="off"
           spellCheck={false}
         />
@@ -300,7 +300,7 @@ export function Terminal() {
           disabled={mic.state === "unsupported"}
           title={mic.state === "listening" ? "Stop listening (Ctrl+Space)" : "Start listening (Ctrl+Space)"}
           className={cn(
-            "rounded-sm border p-1.5 transition disabled:opacity-30",
+            "flex min-h-9 min-w-9 items-center justify-center rounded-sm border p-1.5 transition disabled:opacity-30",
             mic.state === "listening"
               ? "border-ok-hud/50 bg-ok-hud/10 text-ok-hud"
               : mic.state === "denied"
@@ -315,7 +315,7 @@ export function Terminal() {
           onClick={toggleMute}
           title={muted ? "Enable voice" : "Mute voice"}
           className={cn(
-            "rounded-sm border p-1.5 transition",
+            "flex min-h-9 min-w-9 items-center justify-center rounded-sm border p-1.5 transition",
             muted
               ? "border-hud-500/25 text-hud-500/55 hover:text-hud-300"
               : "border-hud-300/40 text-hud-200 hover:bg-hud-400/15",
@@ -327,7 +327,7 @@ export function Terminal() {
         <button
           onClick={() => submit(input)}
           disabled={thinking || !input.trim()}
-          className="rounded-sm border border-hud-300/40 p-1.5 text-hud-200 transition hover:bg-hud-400/15 disabled:opacity-30"
+          className="flex min-h-9 min-w-9 items-center justify-center rounded-sm border border-hud-300/40 p-1.5 text-hud-200 transition hover:bg-hud-400/15 disabled:opacity-30"
         >
           <CornerDownLeft size={13} />
         </button>

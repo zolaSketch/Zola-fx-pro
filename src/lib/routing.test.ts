@@ -60,6 +60,30 @@ describe("intent routing precedence", () => {
     expect((calls[0].args as { expression: string }).expression).toBe("2^10");
   });
 
+  it("routes computed-knowledge intents to the knowledge layer", () => {
+    // These are numeric or command-like and could be mistaken for arithmetic,
+    // reactor commands or a web search.
+    for (const q of [
+      "is 7919 prime",
+      "roll 3d6",
+      "flip a coin",
+      "45 in roman numerals",
+      "what is 255 in hexadecimal",
+      "gcd of 48 and 18",
+      "generate a password",
+      "sha256 of hello",
+      "what is the moon phase",
+      "word count of this sentence",
+    ]) {
+      expectTool(q, "web_lookup");
+    }
+  });
+
+  it("does not let computed intents hijack reactor commands", () => {
+    expectTool("set power to 40", "set_power");
+    expectTool("divert 80% to the reactor", "set_power");
+  });
+
   it("routes definitions to knowledge", () => {
     expectTool("define serendipity", "web_lookup");
     expectTool("what does ubiquitous mean", "web_lookup");

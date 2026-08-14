@@ -29,7 +29,16 @@ export function classify(query: string): Domain {
     return "science";
   if (/\b(book|novel|who wrote|author of)\b/.test(q)) return "books";
   if (/\b(film|movie|directed by|starring)\b/.test(q)) return "film";
-  if (/\b(fact about|interesting about) (the )?number\b/.test(q)) return "numbers";
+  // Computed number work: primes, factors, bases, Roman numerals, chance.
+  if (
+    /\b(prime|factorise|factorize|factors of|gcd|lcm|hcf|roman numerals?|binary|hexadecimal|octal)\b/.test(q) ||
+    /\b(roll|dice|coin|random number)\b/.test(q) ||
+    // A bare Roman numeral, e.g. "what is MCMLXXXVII in decimal".
+    /\b[MDCLXVI]{2,15}\b/.test(query) ||
+    /\b\d{0,3}\s*d\s*\d{1,4}\b/.test(q) ||
+    /\b(fact about|interesting about) (the )?number\b/.test(q)
+  )
+    return "numbers";
   if (/\bwho (is|was|are|were)\b/.test(q)) return "people";
 
   return "general";

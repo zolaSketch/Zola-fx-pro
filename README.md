@@ -13,13 +13,46 @@ genuine device telemetry, and memory that persists across sessions.
 
 ```bash
 npm install
-cp .env.example .env.local     # add OPENAI_API_KEY for the LLM brain
 npm run dev                    # http://localhost:3000
 ```
 
 Click the orb (or press `Ctrl+Space`) and say:
 
 > "**Jarvis**, what's the weather in Tokyo?"
+
+### Do I need an API key?
+
+**No.** JARVIS is fully functional without one. A key only upgrades the
+*conversation* to an LLM; every capability works either way.
+
+| | No key | With `OPENAI_API_KEY` |
+| --- | --- | --- |
+| All 20+ tools | ✅ | ✅ |
+| Offline knowledge core | ✅ | ✅ |
+| Live weather, lookup, rates | ✅ | ✅ |
+| Voice in and out | ✅ | ✅ |
+| Memory and recall | ✅ | ✅ |
+| Free-form chat | rule-based | LLM |
+
+To enable the LLM: `cp .env.example .env.local` and add your key.
+
+### On your phone
+
+The HUD is fully responsive and installable as a PWA.
+
+```bash
+npm run dev
+# open http://<your-computer-ip>:3000 on the phone, same Wi-Fi
+```
+
+Below `lg` the three columns collapse into four thumb-reachable tabs —
+**TALK · POWER · SUIT · INTEL** — with safe-area insets for notches, 16px
+inputs so iOS never zooms on focus, and 44px touch targets. Use *Add to Home
+Screen* to run it fullscreen as an app.
+
+> Voice **input** needs Chrome/Edge on Android. iOS Safari does not implement
+> `SpeechRecognition`, so the mic disables itself there — typing and JARVIS's
+> spoken replies still work.
 
 ---
 
@@ -63,13 +96,29 @@ parallel and the highest-confidence answer wins.
 | Constants      | **20 CODATA constants** — c, G, h, Nₐ, k_B, α…           |
 | Astronomy      | **11 bodies** — planets, Sun, Moon, Pluto                |
 | Units          | **40+ units** across 6 dimensions, plus temperature      |
+| Number theory  | Primes, factorisation, GCD/LCM, bases, Roman numerals    |
+| Astronomy      | Sunrise/sunset (NOAA), moon phase, day length            |
+| Geodesy        | Great-circle distance and bearing (haversine)            |
+| Colour         | Hex/RGB/HSL, WCAG luminance and legible foreground       |
+| Text           | Word/sentence counts, Flesch readability, reading time   |
+| Security       | CSPRNG passwords with entropy, SHA-1/256/384/512, Base64 |
+| Chance         | Dice notation, coin flips, secure random numbers         |
 
 ```
 "what is the speed of light"        → 2.997925e+8 m/s          (CODATA)
 "tell me about the element gold"    → Au, Z=79, 196.97 u       (periodic table)
 "how big is jupiter"                → 69,911 km radius         (astronomy)
 "convert 100 km to miles"           → 62.137 miles             (units)
+"is 7919 prime"                     → yes                      (number theory)
+"45 in roman numerals"              → XLV                      (number theory)
+"roll 3d6"                          → 10                       (secure random)
+"generate a password"               → 131 bits of entropy      (CSPRNG)
+"what is the moon phase"            → New Moon, 2% illuminated (lunar)
+"#ff8800"                           → HSL, luminance, contrast (colour)
 ```
+
+All of the above are **exact and computed**, not fetched — no key, no network,
+no rate limit.
 
 ### Federated (live network)
 
@@ -179,7 +228,7 @@ src/
 │   └── panels/              Systems, Threat, Reactor, Suit, Device, Timers
 ├── hooks/                   useSpeech, useSpeechRecognition, useJarvisChat
 ├── lib/
-│   ├── knowledge/           router · offline core · 13 providers
+│   ├── knowledge/           router · offline core · 20 providers · compute
 │   ├── capabilities/        weather · search · calc · device  (real work)
 │   ├── tools.ts             zod schemas — the single source of truth
 │   ├── brain.ts             offline intent engine
@@ -202,7 +251,7 @@ are forwarded to the browser, which owns that state.
 
 ## Testing
 
-**138 tests.** Run with `npm test`.
+**188 tests.** Run with `npm test`.
 
 The suite is not decoration — it caught three real bugs during development:
 
@@ -210,7 +259,11 @@ The suite is not decoration — it caught three real bugs during development:
    "5 minutes" silently became 60 seconds.
 2. **Lexer whitespace** — stripping spaces up front fused `"1 2"` into `12`
    instead of rejecting it.
-3. **Intent precedence** — the `lookup` rule matches any question word, so it
+3. **Plural regex, twice more** — `\b` after a singular noun fails on the
+   plural. After "minutes" it recurred with "roman numerals", silently
+   misrouting the query in three separate files. `knowledge.test.ts` now pins
+   both singular and plural forms.
+4. **Intent precedence** — the `lookup` rule matches any question word, so it
    was shadowing weather, time and device queries. Adding unit conversion
    reopened the same hazard ("convert 100 km to miles" contains digits and was
    nearly parsed as arithmetic). `routing.test.ts` now pins the full ordering.

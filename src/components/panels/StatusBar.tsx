@@ -20,7 +20,7 @@ export function StatusBar() {
   const st = STATUS_STYLE[status];
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-hud-400/20 px-4 py-2.5">
+    <header className="flex shrink-0 items-center justify-between gap-2 border-b border-hud-400/20 px-3 py-2 sm:gap-4 sm:px-4 sm:py-2.5">
       <div className="flex min-w-0 items-center gap-3">
         <div className="relative shrink-0">
           <div className="h-7 w-7 rounded-full border border-hud-300/50" />
@@ -30,13 +30,13 @@ export function StatusBar() {
           <h1 className="font-display text-[13px] leading-none tracking-[0.42em] text-white text-glow">
             J.A.R.V.I.S.
           </h1>
-          <p className="mt-1 truncate font-display text-[8px] tracking-[0.22em] text-hud-400/55">
+          <p className="mt-1 hidden truncate font-display text-[8px] tracking-[0.22em] text-hud-400/55 sm:block">
             JUST A RATHER VERY INTELLIGENT SYSTEM
           </p>
         </div>
       </div>
 
-      <div className="hidden items-center gap-2 md:flex">
+      <div className="hidden items-center gap-2 xl:flex">
         <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse-hud", st.dot)} />
         <span className={cn("font-display text-[9px] tracking-[0.24em]", st.text)}>{st.label}</span>
       </div>

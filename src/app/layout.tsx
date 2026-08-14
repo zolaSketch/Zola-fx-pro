@@ -25,13 +25,22 @@ const mono = localFont({
 export const metadata: Metadata = {
   title: "J.A.R.V.I.S. — Just A Rather Very Intelligent System",
   description:
-    "An Iron Man inspired AI assistant interface: holographic HUD, arc reactor telemetry, threat matrix and a voice-enabled command console.",
+    "An Iron Man inspired AI assistant: voice control, live knowledge, holographic HUD, arc reactor telemetry and a real tool-calling brain.",
+  applicationName: "J.A.R.V.I.S.",
+  manifest: "/manifest.webmanifest",
+  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  appleWebApp: { capable: true, title: "JARVIS", statusBarStyle: "black-translucent" },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
   themeColor: "#01060d",
   width: "device-width",
   initialScale: 1,
+  // Allow pinch-zoom for accessibility, but keep the HUD edge-to-edge and
+  // stop iOS zooming when the command input is focused.
+  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

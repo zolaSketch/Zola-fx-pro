@@ -143,6 +143,51 @@ describe("unit conversion", () => {
   });
 });
 
+describe("plural and case handling", () => {
+  // Regression: \b after a singular noun fails on the plural, which has now
+  // bitten this codebase three times ("minutes", "numerals").
+  it.each([
+    "45 in roman numerals",
+    "45 in roman numeral",
+    "roman numerals for 2026",
+  ])("classifies %s as numbers", (q) => {
+    expect(classify(q)).toBe("numbers");
+  });
+
+  it("converts both directions", async () => {
+    forbidNetwork();
+    expect((await ask("45 in roman numerals"))!.summary).toContain("XLV");
+    expect((await ask("what is MCMLXXXVII in decimal"))!.summary).toContain("1987");
+  });
+
+  it("does not mistake ordinary words for numerals", async () => {
+    // "in", "did", "mid" are all valid [mdclxvi] sequences.
+    expect(classify("what is in the box")).not.toBe("numbers");
+  });
+});
+
+describe("computed providers", () => {
+  it("answers number theory offline", async () => {
+    forbidNetwork();
+    expect((await ask("is 7919 prime"))!.summary).toMatch(/prime/i);
+    expect((await ask("what is 255 in hexadecimal"))!.summary).toContain("FF");
+    expect((await ask("gcd of 48 and 18"))!.summary).toContain("6");
+  });
+
+  it("answers chance offline", async () => {
+    forbidNetwork();
+    expect((await ask("roll 3d6"))!.summary).toMatch(/3d6/);
+    expect((await ask("flip a coin"))!.summary).toMatch(/heads|tails/i);
+  });
+
+  it("answers colour, moon and passwords offline", async () => {
+    forbidNetwork();
+    expect((await ask("#ff8800"))!.meta!.join()).toContain("#ff8800");
+    expect((await ask("what is the moon phase"))!.summary).toMatch(/moon/i);
+    expect((await ask("generate a password"))!.meta!.join()).toMatch(/PASSWORD/);
+  });
+});
+
 describe("router", () => {
   it("answers offline for constants, elements, planets and units", async () => {
     forbidNetwork();
