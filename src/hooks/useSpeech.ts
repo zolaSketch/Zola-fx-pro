@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 
 const emptySubscribe = () => () => {};
 
-/** Hydration-safe capability probe (no setState-in-effect). */
 function useSpeechSupported() {
   return useSyncExternalStore(
     emptySubscribe,
@@ -13,13 +12,26 @@ function useSpeechSupported() {
   );
 }
 
-/** Wraps the Web Speech API for JARVIS voice output, with graceful degradation. */
+/**
+ * Queued speech synthesis for JARVIS.
+ *
+ * Sentences are enqueued as they stream in, so speech begins before the full
+ * reply has arrived. Exposes `speaking` so the mic can be gated (preventing
+ * JARVIS from hearing himself) and the voice orb can react.
+ */
 export function useSpeech(muted: boolean) {
   const supported = useSpeechSupported();
   const [speaking, setSpeaking] = useState(false);
-  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
 
-  // Pick the most JARVIS-like voice available. Purely an external-system read.
+  const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
+  const queueRef = useRef<string[]>([]);
+  const activeRef = useRef(false);
+  const mutedRef = useRef(muted);
+
+  useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
   useEffect(() => {
     if (!supported) return;
     const synth = window.speechSynthesis;
@@ -27,7 +39,8 @@ export function useSpeech(muted: boolean) {
     const pick = () => {
       const voices = synth.getVoices();
       if (!voices.length) return;
-      const prefer = [/daniel/i, /google uk english male/i, /en-GB/i, /male/i];
+      // Prefer a crisp British male — closest to the films.
+      const prefer = [/daniel/i, /google uk english male/i, /arthur/i, /oliver/i, /en-GB/i, /male/i];
       for (const p of prefer) {
         const v = voices.find((x) => p.test(x.name) || p.test(x.lang));
         if (v) {
@@ -43,36 +56,73 @@ export function useSpeech(muted: boolean) {
     return () => synth.removeEventListener("voiceschanged", pick);
   }, [supported]);
 
-  // When muted, silence the synth. Speaking state is driven by utterance events,
-  // so this effect only touches the external system.
-  useEffect(() => {
-    if (!supported || !muted) return;
-    window.speechSynthesis.cancel();
-  }, [supported, muted]);
+  /**
+   * Play the next queued line. Declared as a named function expression so the
+   * utterance's `onend` handler can recurse into it without a use-before-declare
+   * cycle or a ref written during render.
+   */
+  const drain = useCallback(function drainQueue() {
+    if (!supported || activeRef.current) return;
 
+    if (mutedRef.current) {
+      queueRef.current = [];
+      setSpeaking(false);
+      return;
+    }
+
+    const next = queueRef.current.shift();
+    if (next === undefined) {
+      setSpeaking(false);
+      return;
+    }
+
+    const u = new SpeechSynthesisUtterance(next);
+    if (voiceRef.current) u.voice = voiceRef.current;
+    u.rate = 1.05;
+    u.pitch = 0.8;
+    u.volume = 1;
+
+    activeRef.current = true;
+    setSpeaking(true);
+
+    const finish = () => {
+      activeRef.current = false;
+      // Continue with whatever queued up while this line was playing.
+      if (queueRef.current.length) drainQueue();
+      else setSpeaking(false);
+    };
+    u.onend = finish;
+    u.onerror = finish;
+
+    window.speechSynthesis.speak(u);
+  }, [supported]);
+
+  /** Enqueue a line. Safe to call repeatedly as text streams in. */
   const speak = useCallback(
     (text: string) => {
-      if (!supported || muted) return;
-      const synth = window.speechSynthesis;
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      if (voiceRef.current) u.voice = voiceRef.current;
-      u.rate = 1.02;
-      u.pitch = 0.82;
-      u.volume = 0.95;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
-      synth.speak(u);
+      const t = text.trim();
+      if (!supported || mutedRef.current || !t) return;
+      queueRef.current.push(t);
+      drain();
     },
-    [supported, muted],
+    [supported, drain],
   );
 
   const stop = useCallback(() => {
-    if (!supported) return;
-    window.speechSynthesis.cancel();
+    queueRef.current = [];
+    activeRef.current = false;
+    if (supported) window.speechSynthesis.cancel();
     setSpeaking(false);
   }, [supported]);
+
+  // Muting is a command to an external system (the synth). `speaking` is
+  // reported as false while muted via the return value, so no setState here.
+  useEffect(() => {
+    if (!supported || !muted) return;
+    queueRef.current = [];
+    activeRef.current = false;
+    window.speechSynthesis.cancel();
+  }, [supported, muted]);
 
   return { speak, stop, speaking: speaking && !muted, supported };
 }

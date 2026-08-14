@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { CornerDownLeft, Volume2, VolumeX } from "lucide-react";
+import { CornerDownLeft, Mic, MicOff, Volume2, VolumeX, Square } from "lucide-react";
 import { useJarvis } from "@/store/jarvis";
-import { fallbackReply, resolveCommand } from "@/lib/commands";
 import type { LogEntry } from "@/lib/types";
 import { cn, pad } from "@/lib/utils";
 import { useSpeech } from "@/hooks/useSpeech";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { useJarvisChat } from "@/hooks/useJarvisChat";
+import { VoiceOrb } from "@/components/hud/VoiceOrb";
 
 const TONE_CLASS: Record<NonNullable<LogEntry["tone"]>, string> = {
   neutral: "text-hud-100",
@@ -16,7 +18,13 @@ const TONE_CLASS: Record<NonNullable<LogEntry["tone"]>, string> = {
   danger: "text-danger-hud",
 };
 
-const SUGGESTIONS = ["status", "scan", "power 100", "suit up", "protocol lockdown", "help"];
+const SUGGESTIONS = [
+  "Status report",
+  "Scan the perimeter",
+  "Divert 100% to the reactor",
+  "Suit up",
+  "Lockdown protocol",
+];
 
 function stamp(at: number) {
   const d = new Date(at);
@@ -24,81 +32,76 @@ function stamp(at: number) {
 }
 
 export function Terminal() {
-  const {
-    log,
-    push,
-    clearLog,
-    power,
-    status,
-    setPower,
-    setStatus,
-    scanThreats,
-    thinking,
-    setThinking,
-    muted,
-    toggleMute,
-  } = useJarvis();
+  const log = useJarvis((s) => s.log);
+  const thinking = useJarvis((s) => s.thinking);
+  const muted = useJarvis((s) => s.muted);
+  const toggleMute = useJarvis((s) => s.toggleMute);
+  const engine = useJarvis((s) => s.engine);
 
   const [input, setInput] = useState("");
   const [history, setHistory] = useState<string[]>([]);
   const [hIndex, setHIndex] = useState(-1);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { speak, speaking } = useSpeech(muted);
+
+  const { speak, stop: stopSpeech, speaking } = useSpeech(muted);
+  const { send, cancel } = useJarvisChat({ onSentence: speak });
+
+  // Voice input. Gate the mic while JARVIS talks so he never hears himself.
+  const handleVoice = useCallback(
+    (text: string) => {
+      if (text === "__WAKE_ONLY__") {
+        speak("Yes, sir?");
+        return;
+      }
+      void send(text);
+    },
+    [send, speak],
+  );
+
+  const mic = useSpeechRecognition({
+    onCommand: handleVoice,
+    wakeWord: "jarvis",
+    requireWake: true,
+    paused: speaking,
+  });
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [log, thinking]);
 
   useEffect(() => {
-    const focus = (e: KeyboardEvent) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === "/" && document.activeElement !== inputRef.current) {
         e.preventDefault();
         inputRef.current?.focus();
       }
+      // Space toggles the mic when not typing.
+      if (
+        e.code === "Space" &&
+        e.ctrlKey &&
+        document.activeElement !== inputRef.current
+      ) {
+        e.preventDefault();
+        mic.toggle();
+      }
     };
-    window.addEventListener("keydown", focus);
-    return () => window.removeEventListener("keydown", focus);
-  }, []);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mic]);
 
-  const submit = async (raw: string) => {
+  const submit = (raw: string) => {
     const text = raw.trim();
     if (!text || thinking) return;
-
-    push("user", text);
     setHistory((h) => [text, ...h].slice(0, 40));
     setHIndex(-1);
     setInput("");
-    setThinking(true);
-
-    await new Promise((r) => setTimeout(r, 320 + Math.random() * 420));
-
-    const say: (t: string, o?: Partial<LogEntry>) => void = (t, o) => {
-      push("jarvis", t, o);
-      speak(t);
-    };
-
-    const cmd = resolveCommand(text);
-    if (cmd?.name === "clear") {
-      clearLog();
-      push("system", "Transcript purged.");
-    } else if (cmd?.name === "scan") {
-      scanThreats();
-      speak("Sweep complete. Contacts resolved within perimeter.");
-    } else if (cmd) {
-      await cmd.run(text.toLowerCase(), { say, setPower, setStatus, power, status });
-    } else {
-      say(fallbackReply(text.length));
-    }
-
-    setThinking(false);
-    inputRef.current?.focus();
+    void send(text);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      void submit(input);
-    } else if (e.key === "ArrowUp") {
+    if (e.key === "Enter") submit(input);
+    else if (e.key === "ArrowUp") {
       e.preventDefault();
       const i = Math.min(hIndex + 1, history.length - 1);
       if (i >= 0) {
@@ -113,8 +116,53 @@ export function Terminal() {
     }
   };
 
+  const orbMode = speaking
+    ? "speaking"
+    : thinking
+      ? "thinking"
+      : mic.heardWake
+        ? "wake"
+        : mic.state === "listening"
+          ? "listening"
+          : "idle";
+
   return (
     <div className="flex h-full min-h-0 flex-col">
+      {/* voice orb header */}
+      <div className="mb-2 flex shrink-0 items-center gap-3 border-b border-hud-400/15 pb-2">
+        <VoiceOrb mode={orbMode} className="h-16 w-16 shrink-0" onClick={mic.toggle} />
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-[9px] tracking-[0.24em] text-hud-300/70">
+            {orbMode === "speaking"
+              ? "SPEAKING"
+              : orbMode === "thinking"
+                ? "PROCESSING"
+                : orbMode === "wake"
+                  ? "WAKE WORD DETECTED"
+                  : mic.state === "listening"
+                    ? 'LISTENING — SAY "JARVIS…"'
+                    : mic.state === "denied"
+                      ? "MIC ACCESS DENIED"
+                      : mic.state === "unsupported"
+                        ? "VOICE INPUT UNSUPPORTED"
+                        : "VOICE STANDBY"}
+          </p>
+          <p className="mt-0.5 h-4 truncate text-[11px] italic text-hud-400/60">
+            {mic.interim || (engine ? `engine · ${engine}` : "\u00a0")}
+          </p>
+        </div>
+        {speaking && (
+          <button
+            onClick={stopSpeech}
+            title="Stop speaking"
+            className="rounded-sm border border-danger-hud/40 p-1.5 text-danger-hud transition hover:bg-danger-hud/15"
+          >
+            <Square size={12} />
+          </button>
+        )}
+      </div>
+
+      {/* transcript */}
       <div
         ref={scrollRef}
         className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1 text-[12px] leading-relaxed"
@@ -146,13 +194,21 @@ export function Terminal() {
                     e.speaker === "user"
                       ? "border border-hud-400/25 bg-hud-500/10 text-hud-100"
                       : e.speaker === "system"
-                        ? "text-hud-500/70 italic"
-                        : cn("border-l-2 border-hud-400/50 bg-hud-900/25", TONE_CLASS[e.tone ?? "neutral"]),
+                        ? "text-hud-500/70"
+                        : cn(
+                            "border-l-2 border-hud-400/50 bg-hud-900/25",
+                            TONE_CLASS[e.tone ?? "neutral"],
+                          ),
                   )}
                 >
-                  <p className="whitespace-pre-wrap">{e.text}</p>
+                  {e.text && <p className="whitespace-pre-wrap">{e.text}</p>}
                   {e.meta && e.meta.length > 0 && (
-                    <ul className="mt-1.5 space-y-0.5 border-t border-hud-400/15 pt-1.5 font-mono-hud text-[10.5px] text-hud-300/70">
+                    <ul
+                      className={cn(
+                        "space-y-0.5 font-mono-hud text-[10.5px] text-hud-300/70",
+                        e.text && "mt-1.5 border-t border-hud-400/15 pt-1.5",
+                      )}
+                    >
                       {e.meta.map((m, i) => (
                         <li key={i} className="whitespace-pre-wrap">
                           <span className="mr-1.5 text-hud-500/50">·</span>
@@ -193,6 +249,12 @@ export function Terminal() {
                 />
               ))}
             </div>
+            <button
+              onClick={cancel}
+              className="font-display text-[8px] tracking-[0.18em] text-hud-500/60 hover:text-danger-hud"
+            >
+              ABORT
+            </button>
           </motion.div>
         )}
       </div>
@@ -202,7 +264,7 @@ export function Terminal() {
         {SUGGESTIONS.map((s) => (
           <button
             key={s}
-            onClick={() => void submit(s)}
+            onClick={() => submit(s)}
             disabled={thinking}
             className="rounded-sm border border-hud-400/20 bg-hud-500/5 px-2 py-1 font-display text-[9px] tracking-[0.12em] text-hud-300/75 transition hover:border-hud-300/50 hover:bg-hud-400/15 hover:text-hud-100 disabled:opacity-40"
           >
@@ -211,7 +273,7 @@ export function Terminal() {
         ))}
       </div>
 
-      {/* input */}
+      {/* input row */}
       <div className="mt-2.5 flex shrink-0 items-center gap-2 border-t border-hud-400/20 pt-2.5">
         <span
           className={cn(
@@ -227,11 +289,28 @@ export function Terminal() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           disabled={thinking}
-          placeholder={thinking ? "processing…" : "Speak your directive, sir…  (press / to focus)"}
+          placeholder={thinking ? "processing…" : "Speak or type your directive, sir…"}
           className="min-w-0 flex-1 bg-transparent font-mono-hud text-[12.5px] text-hud-50 outline-none placeholder:text-hud-500/45 disabled:opacity-50"
           autoComplete="off"
           spellCheck={false}
         />
+
+        <button
+          onClick={mic.toggle}
+          disabled={mic.state === "unsupported"}
+          title={mic.state === "listening" ? "Stop listening (Ctrl+Space)" : "Start listening (Ctrl+Space)"}
+          className={cn(
+            "rounded-sm border p-1.5 transition disabled:opacity-30",
+            mic.state === "listening"
+              ? "border-ok-hud/50 bg-ok-hud/10 text-ok-hud"
+              : mic.state === "denied"
+                ? "border-danger-hud/40 text-danger-hud"
+                : "border-hud-500/30 text-hud-400 hover:text-hud-200",
+          )}
+        >
+          {mic.state === "listening" ? <Mic size={13} /> : <MicOff size={13} />}
+        </button>
+
         <button
           onClick={toggleMute}
           title={muted ? "Enable voice" : "Mute voice"}
@@ -240,13 +319,13 @@ export function Terminal() {
             muted
               ? "border-hud-500/25 text-hud-500/55 hover:text-hud-300"
               : "border-hud-300/40 text-hud-200 hover:bg-hud-400/15",
-            speaking && !muted && "animate-pulse-hud",
           )}
         >
           {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
         </button>
+
         <button
-          onClick={() => void submit(input)}
+          onClick={() => submit(input)}
           disabled={thinking || !input.trim()}
           className="rounded-sm border border-hud-300/40 p-1.5 text-hud-200 transition hover:bg-hud-400/15 disabled:opacity-30"
         >

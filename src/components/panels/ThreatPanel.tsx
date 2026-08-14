@@ -13,7 +13,7 @@ const LEVEL = {
 
 export function ThreatPanel() {
   const threats = useJarvis((s) => s.threats);
-  const scanThreats = useJarvis((s) => s.scanThreats);
+  const runTool = useJarvis((s) => s.runTool);
 
   return (
     <Panel title="THREAT MATRIX" badge={`${threats.length} CONTACTS`} bodyClassName="flex flex-col gap-2">
@@ -42,7 +42,7 @@ export function ThreatPanel() {
       </ul>
 
       <button
-        onClick={scanThreats}
+        onClick={() => runTool({ name: "scan_threats", args: { focus: "all" } })}
         className="shrink-0 rounded-sm border border-hud-300/35 bg-hud-500/5 py-1.5 font-display text-[9px] tracking-[0.22em] text-hud-200 transition hover:bg-hud-400/15 hover:text-white"
       >
         INITIATE SWEEP
