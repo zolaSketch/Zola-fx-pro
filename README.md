@@ -72,17 +72,25 @@ cognition — nothing breaks.
 
 ### On your phone
 
-The HUD is fully responsive and installable as a PWA.
+The sandbox preview cannot be opened on a phone — it enforces a traffic access
+token. **Deploy it instead** and you get a permanent link that also unblocks
+the live network features:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FzolaSketch%2FZola-fx-pro%2Ftree%2Farena%2F019ffe82-zola-fx-pro&project-name=jarvis&repository-name=jarvis)
+
+See **[DEPLOY.md](./DEPLOY.md)** for step-by-step instructions and phone
+installation. Running locally works too:
 
 ```bash
-npm run dev
-# open http://<your-computer-ip>:3000 on the phone, same Wi-Fi
+npm run build && npm run start
+# then open http://<your-computer-ip>:3000 on the phone, same Wi-Fi
 ```
 
 Below `lg` the three columns collapse into four thumb-reachable tabs —
 **TALK · POWER · SUIT · INTEL** — with safe-area insets for notches, 16px
-inputs so iOS never zooms on focus, and 44px touch targets. Use *Add to Home
-Screen* to run it fullscreen as an app.
+inputs so iOS never zooms on focus, and 44px touch targets. It installs as a
+PWA with a service worker, so once installed the offline knowledge core,
+arithmetic, memory and voice keep working with no connection.
 
 > Voice **input** needs Chrome/Edge on Android. iOS Safari does not implement
 > `SpeechRecognition`, so the mic disables itself there — typing and JARVIS's
