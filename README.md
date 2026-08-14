@@ -202,7 +202,7 @@ are forwarded to the browser, which owns that state.
 
 ## Testing
 
-**133 tests.** Run with `npm test`.
+**138 tests.** Run with `npm test`.
 
 The suite is not decoration — it caught three real bugs during development:
 

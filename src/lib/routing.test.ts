@@ -47,6 +47,19 @@ describe("intent routing precedence", () => {
     expectTool("how many feet in a mile", "web_lookup");
   });
 
+  it('disambiguates "power": reactor vs exponentiation vs shutdown', () => {
+    // Regression: "what is 2 to the power of 64" set the reactor to 2%.
+    expectTool("what is 2 to the power of 64", "calculate");
+    expectTool("what is 3 raised to the power of 4", "calculate");
+    expectTool("divert power to the reactor at 60", "set_power");
+    expectTool("set power to 40", "set_power");
+  });
+
+  it("evaluates exponentiation phrasing correctly", () => {
+    const { calls } = understand("what is 2 to the power of 10");
+    expect((calls[0].args as { expression: string }).expression).toBe("2^10");
+  });
+
   it("routes definitions to knowledge", () => {
     expectTool("define serendipity", "web_lookup");
     expectTool("what does ubiquitous mean", "web_lookup");

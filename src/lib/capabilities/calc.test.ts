@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluate } from "./calc";
+import { calculate, evaluate } from "./calc";
 
 describe("arithmetic", () => {
   it.each([
@@ -101,5 +101,20 @@ describe("security", () => {
 
   it("never returns a non-finite number", () => {
     expect(() => evaluate("1e400")).toThrow();
+  });
+});
+
+describe("formatting", () => {
+  it("prints large integers exactly rather than rounding to zeros", () => {
+    // 2^64 previously rendered as 18446744073700000000.
+    expect(calculate("2^64").summary).toContain("18,446,744,073,709,551,616");
+  });
+
+  it("groups thousands", () => {
+    expect(calculate("1234567").summary).toContain("1,234,567");
+  });
+
+  it("keeps fractional precision readable", () => {
+    expect(calculate("10/3").summary).toMatch(/3\.33/);
   });
 });

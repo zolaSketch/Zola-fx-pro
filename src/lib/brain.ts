@@ -113,9 +113,13 @@ const RULES: Rule[] = [
   // ---- power -----------------------------------------------------------
   {
     id: "power",
+    // "power" is overloaded: reactor output vs. exponentiation ("2 to the
+    // power of 64") vs. shutdown. Require a reactor sense and exclude the
+    // mathematical and shutdown readings.
     test: (s) =>
       has(s, "power", "reactor", "divert", "output", "energy", "juice") &&
-      !has(s, "power down", "shut"),
+      !has(s, "power down", "shut", "power of", "powers of", "raised to") &&
+      !/\bto the power\b/.test(s),
     build: (s) => {
       const n = extractNumber(s);
       if (n === null) {
@@ -330,9 +334,12 @@ const RULES: Rule[] = [
   // arithmetic, and before `lookup` so it is not sent to Wikipedia.
   {
     id: "convert",
+    // The "<n> <unit> to <unit>" shape also matches "3 raised to the power of
+    // 4", so exponentiation phrasing is excluded explicitly.
     test: (s) =>
-      /\b\d+(\.\d+)?\s*[a-z°/]+\s+(to|in|into|as)\s+[a-z°/]/.test(s) ||
-      /^(convert|how many)\b/.test(s),
+      !/\b(to the power|raised to|squared|cubed)\b/.test(s) &&
+      (/\b\d+(\.\d+)?\s*[a-z°/]+\s+(to|in|into|as)\s+[a-z°/]/.test(s) ||
+        /^(convert|how many)\b/.test(s)),
     build: (s) => ({ reply: "", calls: [{ name: "web_lookup", args: { query: s } }] }),
   },
   {
@@ -347,13 +354,14 @@ const RULES: Rule[] = [
     test: (s) =>
       has(s, "calculate", "what is", "what's", "how much is", "compute", "solve") &&
       /[0-9]/.test(s) &&
-      /[+\-*/^%]|\b(plus|minus|times|divided|squared|sqrt|percent of)\b/.test(s),
+      /[+\-*/^%]|\b(plus|minus|times|divided|squared|cubed|sqrt|percent of|to the power of|raised to)\b/.test(s),
     build: (s) => {
       const expression = s
         .replace(/^.*?(calculate|compute|solve|what is|what's|how much is)\s*/i, "")
         .replace(/\bplus\b/g, "+").replace(/\bminus\b/g, "-")
         .replace(/\b(times|multiplied by)\b/g, "*").replace(/\bdivided by\b/g, "/")
         .replace(/\bsquared\b/g, "^2").replace(/\bcubed\b/g, "^3")
+        .replace(/\s*(?:to the power of|raised to(?: the power of)?)\s*/g, "^")
         .replace(/\bpercent of\b/g, "/100*")
         .replace(/[?.]+$/, "")
         .trim();

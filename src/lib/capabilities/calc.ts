@@ -194,9 +194,15 @@ export function evaluate(expression: string): number {
 }
 
 function pretty(n: number): string {
-  if (Number.isInteger(n) && Math.abs(n) < 1e15) return n.toLocaleString();
+  // Integers beyond 2^53 lose precision in toPrecision/String, printing
+  // 18446744073700000000 for 2^64. Format the exact double instead.
+  if (Number.isInteger(n)) {
+    return Math.abs(n) < 1e21
+      ? BigInt(n).toLocaleString()
+      : n.toExponential(6);
+  }
   const r = Number(n.toPrecision(12));
-  return String(r);
+  return r.toLocaleString(undefined, { maximumSignificantDigits: 12 });
 }
 
 export function calculate(expression: string): CapabilityResult {
