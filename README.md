@@ -30,8 +30,8 @@ is which.
 
 | Genuinely real                                          | Deliberately simulated        |
 | ------------------------------------------------------- | ----------------------------- |
-| Weather + 3-day forecast (Open-Meteo, live)              | Arc reactor output            |
-| Knowledge lookup (Wikipedia, DuckDuckGo)                 | Repulsors, thrusters, armour  |
+| **Knowledge federation — 13 providers** (see below)      | Arc reactor output            |
+| Weather + 3-day forecast (Open-Meteo, live)              | Repulsors, thrusters, armour  |
 | Arithmetic (a real parser, exact results)                | Threat matrix contacts        |
 | Time in any IANA timezone                                | Suit deployment               |
 | Battery, network type, RTT, JS heap, CPU cores, live FPS | Stark protocols               |
@@ -41,6 +41,49 @@ is which.
 
 No invented figures are ever presented as real data. If a live source is
 unreachable, JARVIS says so in character rather than fabricating a number.
+
+---
+
+## Knowledge
+
+> **On "all the world's knowledge":** that cannot live in a repository —
+> Wikipedia alone is ~100 GB. What *is* achievable, and what this implements,
+> is **federated access** to a large slice of it, plus an **offline core** so
+> JARVIS is never entirely ignorant without a network.
+
+A router classifies each question into a domain, then queries the right
+specialists. Offline providers answer instantly; network providers race in
+parallel and the highest-confidence answer wins.
+
+### Resident (no network, instant)
+
+| Core           | Contents                                                |
+| -------------- | ------------------------------------------------------- |
+| Periodic table | All **118 elements** — symbol, Z, mass, category         |
+| Constants      | **20 CODATA constants** — c, G, h, Nₐ, k_B, α…           |
+| Astronomy      | **11 bodies** — planets, Sun, Moon, Pluto                |
+| Units          | **40+ units** across 6 dimensions, plus temperature      |
+
+```
+"what is the speed of light"        → 2.997925e+8 m/s          (CODATA)
+"tell me about the element gold"    → Au, Z=79, 196.97 u       (periodic table)
+"how big is jupiter"                → 69,911 km radius         (astronomy)
+"convert 100 km to miles"           → 62.137 miles             (units)
+```
+
+### Federated (live network)
+
+Wikipedia (summary + full-text search) · DuckDuckGo · Dictionary API ·
+REST Countries · Frankfurter/ECB exchange rates · CoinGecko · Open Library ·
+Numbers API
+
+```
+"define serendipity"     "capital of Japan"     "100 usd to eur"
+"bitcoin price"          "who wrote Dune"       "who is Nikola Tesla"
+```
+
+Every provider is optional. If one is unreachable the router simply uses the
+next, and if nothing answers JARVIS says so rather than inventing a fact.
 
 ---
 
@@ -136,6 +179,7 @@ src/
 │   └── panels/              Systems, Threat, Reactor, Suit, Device, Timers
 ├── hooks/                   useSpeech, useSpeechRecognition, useJarvisChat
 ├── lib/
+│   ├── knowledge/           router · offline core · 13 providers
 │   ├── capabilities/        weather · search · calc · device  (real work)
 │   ├── tools.ts             zod schemas — the single source of truth
 │   ├── brain.ts             offline intent engine
@@ -158,7 +202,7 @@ are forwarded to the browser, which owns that state.
 
 ## Testing
 
-**94 tests.** Run with `npm test`.
+**133 tests.** Run with `npm test`.
 
 The suite is not decoration — it caught three real bugs during development:
 
@@ -167,8 +211,14 @@ The suite is not decoration — it caught three real bugs during development:
 2. **Lexer whitespace** — stripping spaces up front fused `"1 2"` into `12`
    instead of rejecting it.
 3. **Intent precedence** — the `lookup` rule matches any question word, so it
-   was shadowing weather, time and device queries. `routing.test.ts` now pins
-   that ordering so the regression cannot return.
+   was shadowing weather, time and device queries. Adding unit conversion
+   reopened the same hazard ("convert 100 km to miles" contains digits and was
+   nearly parsed as arithmetic). `routing.test.ts` now pins the full ordering.
+
+The knowledge core is also property-tested: all 118 elements must have valid
+symbols and unique identifiers, planets must be ordered outward from the Sun,
+constants must match on whole words only (so "c" does not fire inside "cats"),
+and offline providers are asserted to make **no network calls at all**.
 
 The calculator is a **recursive-descent parser, never `eval`**, because it
 receives untrusted input from voice and LLM output. 14 escape attempts

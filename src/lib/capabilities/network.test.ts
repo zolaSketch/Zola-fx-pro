@@ -131,12 +131,25 @@ describe("knowledge lookup", () => {
       "fetch",
       vi.fn((url: string) =>
         url.includes("rest_v1")
-          ? json({ title: "Mercury", extract: "Mercury may refer to", type: "disambiguation" })
+          ? json({ title: "Blort", extract: "Blort may refer to", type: "disambiguation" })
           : json({}, false),
       ),
     );
-    const r = await lookup("mercury");
+    // "mercury" would now be answered offline by the astronomy core, so this
+    // uses a term no offline provider claims.
+    const r = await lookup("blort");
     expect(r.ok).toBe(false);
+  });
+
+  it("prefers the offline core over the network for known facts", async () => {
+    const f = vi.fn(() => json({}, false));
+    vi.stubGlobal("fetch", f);
+
+    const r = await lookup("mercury");
+    expect(r.ok).toBe(true);
+    expect(r.summary).toMatch(/terrestrial planet/);
+    // Answered entirely from the embedded knowledge core.
+    expect(f).not.toHaveBeenCalled();
   });
 
   it("requires a query", async () => {

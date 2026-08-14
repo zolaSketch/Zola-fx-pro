@@ -39,6 +39,19 @@ describe("intent routing precedence", () => {
     expectTool("scan the perimeter", "scan_threats");
   });
 
+  it("routes unit conversions to knowledge, not the calculator", () => {
+    // Regression guard: "convert 100 km to miles" contains digits and could
+    // be swallowed by the arithmetic rule.
+    expectTool("convert 100 km to miles", "web_lookup");
+    expectTool("250 f to celsius", "web_lookup");
+    expectTool("how many feet in a mile", "web_lookup");
+  });
+
+  it("routes definitions to knowledge", () => {
+    expectTool("define serendipity", "web_lookup");
+    expectTool("what does ubiquitous mean", "web_lookup");
+  });
+
   it("falls through to lookup for genuine knowledge questions", () => {
     expectTool("who is Nikola Tesla", "web_lookup");
     expectTool("what is a black hole", "web_lookup");

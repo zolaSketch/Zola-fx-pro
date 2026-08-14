@@ -325,6 +325,22 @@ const RULES: Rule[] = [
     },
   },
 
+  // ---- unit conversion & knowledge domains (real) ----------------------
+  // Placed before `calculate` so "convert 100 km to miles" is not parsed as
+  // arithmetic, and before `lookup` so it is not sent to Wikipedia.
+  {
+    id: "convert",
+    test: (s) =>
+      /\b\d+(\.\d+)?\s*[a-z°/]+\s+(to|in|into|as)\s+[a-z°/]/.test(s) ||
+      /^(convert|how many)\b/.test(s),
+    build: (s) => ({ reply: "", calls: [{ name: "web_lookup", args: { query: s } }] }),
+  },
+  {
+    id: "define",
+    test: (s) => /^(define|definition of|meaning of)\b/.test(s) || /\bwhat does .+ mean\b/.test(s),
+    build: (s) => ({ reply: "", calls: [{ name: "web_lookup", args: { query: s } }] }),
+  },
+
   // ---- maths (real evaluation) -----------------------------------------
   {
     id: "calculate",
@@ -392,8 +408,9 @@ const RULES: Rule[] = [
   {
     id: "lookup",
     test: (s) =>
-      /^(who|what|where|when|why|how)\b/.test(s) ||
-      has(s, "look up", "search for", "tell me about", "google"),
+      /^(who|what|where|when|why|how|which|is|are|does|did|can)\b/.test(s) ||
+      has(s, "look up", "search for", "tell me about", "google", "explain",
+          "history of", "capital of", "population of", "price of"),
     build: (s) => {
       const query = s
         .replace(/^(who|what|where|when|why|how)\s+(is|are|was|were|did|does|do)\s*/i, "")

@@ -11,6 +11,7 @@ import { ReactorPanel } from "@/components/panels/ReactorPanel";
 import { SuitPanel } from "@/components/panels/SuitPanel";
 import { TimersPanel } from "@/components/panels/TimersPanel";
 import { DevicePanel } from "@/components/panels/DevicePanel";
+import { KnowledgePanel } from "@/components/panels/KnowledgePanel";
 import { useJarvis } from "@/store/jarvis";
 
 const GREETING = [
@@ -69,9 +70,10 @@ export function Dashboard() {
         </Panel>
 
         {/* right column */}
-        <div className="hidden min-h-0 grid-rows-[minmax(0,1.1fr)_minmax(0,1fr)_minmax(0,0.7fr)] gap-3 lg:grid">
+        <div className="hidden min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,0.95fr)_minmax(0,0.9fr)_minmax(0,0.6fr)] gap-3 lg:grid">
           <SuitPanel />
           <ThreatPanel />
+          <KnowledgePanel />
           <TimersPanel />
         </div>
       </div>
