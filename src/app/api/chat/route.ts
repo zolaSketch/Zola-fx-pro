@@ -31,10 +31,12 @@ interface Msg {
 export async function POST(req: NextRequest) {
   let messages: Msg[] = [];
   let memories: string[] = [];
+  let persona = "butler";
   try {
     const body = await req.json();
     messages = Array.isArray(body?.messages) ? body.messages : [];
     memories = Array.isArray(body?.memories) ? body.memories.slice(0, 8) : [];
+    if (typeof body?.persona === "string") persona = body.persona;
   } catch {
     return new Response("Bad request", { status: 400 });
   }
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest) {
       try {
         if (hasKey) {
           try {
-            await streamFromLLM(messages, memories, send, req.signal);
+            await streamFromLLM(messages, memories, persona, send, req.signal);
           } catch (err) {
             console.error("[jarvis] LLM path failed, falling back:", err);
             send({
@@ -92,6 +94,7 @@ type Send = (obj: unknown) => void;
 async function streamFromLLM(
   messages: Msg[],
   memories: string[],
+  persona: string,
   send: Send,
   signal?: AbortSignal,
 ) {
@@ -136,9 +139,12 @@ async function streamFromLLM(
   // Use the Chat Completions endpoint rather than the newer Responses API:
   // it is what proxies, OpenRouter and local servers (Ollama, LM Studio,
   // vLLM) implement, so the same code works against all of them.
+  const { getPersona } = await import("@/lib/personas");
+  const personaBlock = `\n\nCURRENT MODE\n${getPersona(persona as "butler").prompt}`;
+
   const result = streamText({
     model: openai.chat(process.env.JARVIS_MODEL ?? "gpt-4o-mini"),
-    system: SYSTEM_PROMPT + memoryBlock,
+    system: SYSTEM_PROMPT + personaBlock + memoryBlock,
     messages: messages.map((m) => ({ role: m.role, content: m.content })),
     tools,
     stopWhen: stepCountIs(6),

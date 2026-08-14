@@ -56,6 +56,23 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
         /* memory unavailable — proceed without it */
       }
 
+      // Persist the transcript so it survives a reload, and give the session
+      // an id on first use.
+      const persist = async () => {
+        try {
+          const { saveConversation, newConversationId } = await import("@/lib/conversations");
+          const st = useJarvis.getState();
+          let id = st.conversationId;
+          if (!id) {
+            id = newConversationId();
+            st.setConversationId(id);
+          }
+          await saveConversation(id, useJarvis.getState().log);
+        } catch {
+          /* history is a convenience; never break the turn over it */
+        }
+      };
+
       let replyId: string | null = null;
       let full = "";
       let spokenUpTo = 0;
@@ -122,6 +139,7 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
           const { runLocally } = await import("@/lib/localEngine");
           for await (const evt of runLocally(clean)) handle(evt);
           flushSentences(true);
+          void persist();
           onDone?.(full);
         } catch {
           push("jarvis", "My apologies, sir. Something went wrong.", { tone: "danger" });
@@ -138,6 +156,7 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
           body: JSON.stringify({
             messages: [...history, { role: "user", content: clean }],
             memories,
+            persona: useJarvis.getState().persona,
           }),
           signal: ac.signal,
         });
@@ -198,6 +217,7 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
         }
 
         flushSentences(true);
+        void persist();
         if (replyId && !full.trim()) {
           updateEntry(replyId, { text: "Done, sir." });
           onSentence?.("Done, sir.");

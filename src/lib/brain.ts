@@ -1,4 +1,5 @@
 import { TOOL_SCHEMAS, type ToolCall, type ToolName } from "./tools";
+import { detectPersonaSwitch } from "./personas";
 
 /**
  * The offline brain.
@@ -68,6 +69,18 @@ interface Rule {
 }
 
 const RULES: Rule[] = [
+  // ---- operating mode ---------------------------------------------------
+  // Declared first: "switch to engineer mode" would otherwise be claimed by
+  // the subsystem or lookup rules.
+  {
+    id: "persona",
+    test: (s) => detectPersonaSwitch(s) !== null,
+    build: (s) => {
+      const id = detectPersonaSwitch(s)!;
+      return { reply: "", calls: [{ name: "set_persona", args: { persona: id } }] };
+    },
+  },
+
   // ---- greetings / identity -------------------------------------------
   {
     id: "greet",
@@ -394,7 +407,10 @@ const RULES: Rule[] = [
   {
     id: "calculate",
     test: (s) =>
-      has(s, "calculate", "what is", "what's", "how much is", "compute", "solve") &&
+      (has(s, "calculate", "what is", "what's", "how much is", "compute", "solve") ||
+        // A bare arithmetic expression with no question prefix.
+        /^[\d\s.,()+\-*/^%]+$/.test(s) ||
+        /^\d+(\.\d+)?\s*(%|percent)\s+of\b/.test(s)) &&
       /[0-9]/.test(s) &&
       /[+\-*/^%]|\b(plus|minus|times|divided|squared|cubed|sqrt|percent of|to the power of|raised to)\b/.test(s),
     build: (s) => {

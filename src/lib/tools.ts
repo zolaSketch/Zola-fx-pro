@@ -75,6 +75,12 @@ export const recallSchema = z.object({
 
 export const deviceSchema = z.object({});
 
+export const personaSchema = z.object({
+  persona: z
+    .enum(["butler", "engineer", "analyst", "tactical", "tutor"])
+    .describe("Operating mode to switch to."),
+});
+
 export const docSearchSchema = z.object({
   query: z.string().describe("What to look for in the user's uploaded documents."),
 });
@@ -133,6 +139,7 @@ export const TOOL_SCHEMAS = {
   read_device: deviceSchema,
   air_traffic: trafficSchema,
   search_documents: docSearchSchema,
+  set_persona: personaSchema,
   // server / real work
   get_weather: weatherSchema,
   web_lookup: searchSchema,
@@ -169,6 +176,8 @@ export const TOOL_DESCRIPTIONS: Record<ToolName, string> = {
     "Scan for real aircraft near the user using live ADS-B data, and plot them on the threat radar.",
   search_documents:
     "Search the user's own uploaded documents and quote the relevant passage.",
+  set_persona:
+    "Switch operating mode: butler, engineer, analyst, tactical or tutor.",
   get_weather: "Get the real current weather and 3-day forecast for a location.",
   web_lookup:
     "Look up real factual information from Wikipedia and other knowledge bases.",

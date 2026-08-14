@@ -112,6 +112,19 @@ describe("intent routing precedence", () => {
     expectTool("what did i write about the reactor", "search_documents");
   });
 
+  it("handles bare arithmetic with no question prefix", () => {
+    expectTool("2+2", "calculate");
+    expectTool("15% of 240", "calculate");
+    expectTool("(12*8)/3", "calculate");
+  });
+
+  it("mode switching does not shadow ordinary commands", () => {
+    expectTool("switch to engineer mode", "set_persona");
+    // These mention mode-adjacent words but are real commands.
+    expectTool("set power to 40", "set_power");
+    expectTool("suit up", "suit_control");
+  });
+
   it("routes definitions to knowledge", () => {
     expectTool("define serendipity", "web_lookup");
     expectTool("what does ubiquitous mean", "web_lookup");

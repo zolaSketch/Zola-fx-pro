@@ -5,6 +5,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { LogEntry, Speaker, Subsystem, SystemStatus, Threat } from "@/lib/types";
 import type { ToolCall } from "@/lib/tools";
 import { clamp } from "@/lib/utils";
+import { DEFAULT_PERSONA, type PersonaId } from "@/lib/personas";
 
 const INITIAL_SUBSYSTEMS: Subsystem[] = [
   { id: "reactor", label: "ARC REACTOR", value: 96, unit: "%", target: 96, drift: 1.4, tone: "hud" },
@@ -58,8 +59,15 @@ interface JarvisState {
   muted: boolean;
   thinking: boolean;
   engine: "llm" | "local" | null;
+  persona: PersonaId;
+  /** Id of the transcript currently being written to. */
+  conversationId: string;
 
   setStatus: (s: SystemStatus) => void;
+  setPersona: (p: PersonaId) => void;
+  setConversationId: (id: string) => void;
+  loadConversation: (id: string) => Promise<void>;
+  newConversation: () => Promise<void>;
   setPower: (n: number) => void;
   setThinking: (v: boolean) => void;
   setEngine: (e: "llm" | "local" | null) => void;
@@ -94,9 +102,25 @@ export const useJarvis = create<JarvisState>()(
       muted: false,
       thinking: false,
       engine: null,
+      persona: DEFAULT_PERSONA,
+      conversationId: "",
 
       setStatus: (status) => set({ status }),
       setEngine: (engine) => set({ engine }),
+      setPersona: (persona) => set({ persona }),
+      setConversationId: (conversationId) => set({ conversationId }),
+
+      loadConversation: async (id) => {
+        const { getConversation } = await import("@/lib/conversations");
+        const c = await getConversation(id);
+        if (!c) return;
+        set({ log: c.messages, conversationId: c.id });
+      },
+
+      newConversation: async () => {
+        const { newConversationId } = await import("@/lib/conversations");
+        set({ log: [], conversationId: newConversationId() });
+      },
 
       setPower: (n) => {
         const power = clamp(n, 0, 100);
@@ -349,6 +373,15 @@ export const useJarvis = create<JarvisState>()(
             });
             break;
           }
+          case "set_persona": {
+            const { persona } = call.args as { persona: PersonaId };
+            set({ persona });
+            void import("@/lib/personas").then(({ getPersona }) => {
+              const p = getPersona(persona);
+              s.push("jarvis", p.greeting, { tone: "ok", meta: [`MODE · ${p.label}`] });
+            });
+            break;
+          }
           case "search_documents": {
             const { query } = call.args as { query: string };
             void (async () => {
@@ -470,6 +503,7 @@ export const useJarvis = create<JarvisState>()(
         notes: s.notes,
         power: s.power,
         suitMark: s.suitMark,
+        persona: s.persona,
       }),
     },
   ),

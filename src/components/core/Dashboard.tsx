@@ -20,6 +20,7 @@ import { TimersPanel } from "@/components/panels/TimersPanel";
 import { DevicePanel } from "@/components/panels/DevicePanel";
 import { KnowledgePanel } from "@/components/panels/KnowledgePanel";
 import { DocsPanel } from "@/components/panels/DocsPanel";
+import { HistoryPanel } from "@/components/panels/HistoryPanel";
 import { useJarvis } from "@/store/jarvis";
 import { cn } from "@/lib/utils";
 
@@ -77,10 +78,11 @@ export function Dashboard() {
 
       {/* ---------------------------------------------- desktop: full HUD */}
       <div className="hidden min-h-0 flex-1 gap-3 p-3 lg:grid lg:grid-cols-[280px_minmax(0,1fr)_280px] xl:grid-cols-[330px_minmax(0,1fr)_330px]">
-        <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(0,1.05fr)_minmax(0,0.75fr)] gap-3">
+        <div className="grid min-h-0 grid-rows-[minmax(0,0.9fr)_minmax(0,1fr)_minmax(0,0.7fr)_minmax(0,1fr)] gap-3">
           <ReactorPanel />
           <SystemsPanel />
           <DevicePanel />
+          <HistoryPanel />
         </div>
 
         <Panel title="COMMAND INTERFACE" badge="VOICE + TEXT" className="min-h-0" bodyClassName="min-h-0">
@@ -122,9 +124,10 @@ export function Dashboard() {
               )}
 
               {tab === "suit" && (
-                <div className="grid h-full min-h-0 grid-rows-[minmax(0,1.6fr)_minmax(0,1fr)] gap-2">
+                <div className="grid h-full min-h-0 grid-rows-[minmax(0,1.4fr)_minmax(0,0.8fr)_minmax(0,1.1fr)] gap-2 overflow-y-auto">
                   <SuitPanel />
                   <TimersPanel />
+                  <HistoryPanel />
                 </div>
               )}
 
