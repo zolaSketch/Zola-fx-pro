@@ -16,7 +16,12 @@ export function ServiceWorker() {
 
     const register = async () => {
       try {
-        const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+        // Under GitHub Pages the app lives at /<repo>, so both the worker
+        // URL and its scope must carry that prefix.
+        const bp = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+        const reg = await navigator.serviceWorker.register(`${bp}/sw.js`, {
+          scope: `${bp}/`,
+        });
 
         // Activate a waiting worker immediately so updates are not stranded.
         if (reg.waiting) reg.waiting.postMessage("SKIP_WAITING");

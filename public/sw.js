@@ -15,13 +15,18 @@ const VERSION = "jarvis-v1";
 const SHELL = `${VERSION}-shell`;
 const ASSETS = `${VERSION}-assets`;
 
+// Derived from the worker's own location, so the same file works at the site
+// root and under a GitHub Pages project path.
+const BASE = self.location.pathname.replace(/\/sw\.js$/, "");
+const HOME = `${BASE}/`;
+
 const PRECACHE = [
-  "/",
-  "/manifest.webmanifest",
-  "/icon.svg",
-  "/icon-192.png",
-  "/icon-512.png",
-  "/apple-touch-icon.png",
+  HOME,
+  `${BASE}/manifest.webmanifest`,
+  `${BASE}/icon.svg`,
+  `${BASE}/icon-192.png`,
+  `${BASE}/icon-512.png`,
+  `${BASE}/apple-touch-icon.png`,
 ];
 
 self.addEventListener("install", (event) => {
@@ -59,7 +64,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== self.location.origin) return;
 
   // API responses are live state — never serve them from cache.
-  if (url.pathname.startsWith("/api/")) return;
+  if (url.pathname.startsWith(`${BASE}/api/`)) return;
 
   // App shell: try the network, fall back to cache when offline.
   if (request.mode === "navigate") {
@@ -68,10 +73,10 @@ self.addEventListener("fetch", (event) => {
         try {
           const fresh = await fetch(request);
           const cache = await caches.open(SHELL);
-          cache.put("/", fresh.clone());
+          cache.put(HOME, fresh.clone());
           return fresh;
         } catch {
-          const cached = await caches.match("/", { ignoreSearch: true });
+          const cached = await caches.match(HOME, { ignoreSearch: true });
           return cached ?? Response.error();
         }
       })(),
@@ -81,7 +86,7 @@ self.addEventListener("fetch", (event) => {
 
   // Build output and icons are content-hashed, so cache-first is safe.
   if (
-    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith(`${BASE}/_next/static/`) ||
     /\.(?:png|svg|ico|woff2?|webmanifest)$/.test(url.pathname)
   ) {
     event.respondWith(

@@ -82,6 +82,55 @@ export function useJarvisChat({ onSentence, onDone }: Options = {}) {
         }
       };
 
+      // Static builds (GitHub Pages) have no API route, so cognition runs in
+      // the browser. Everything except LLM chat behaves identically.
+      const STATIC = process.env.NEXT_PUBLIC_STATIC === "1";
+
+      const handle = (evt: {
+        type: string;
+        value?: string;
+        name?: string;
+        args?: unknown;
+        engine?: string;
+        meta?: string[];
+        ok?: boolean;
+      }) => {
+        if (evt.type === "text" && evt.value) {
+          if (replyId === null) {
+            setThinking(false);
+            replyId = push("jarvis", "");
+          }
+          full += evt.value;
+          appendTo(replyId, evt.value);
+          flushSentences();
+        } else if (evt.type === "tool" && evt.name) {
+          runTool({ name: evt.name, args: evt.args ?? {} } as ToolCall);
+        } else if (evt.type === "result") {
+          const meta = Array.isArray(evt.meta) ? evt.meta : [];
+          if (meta.length) {
+            push("system", "", { meta, tone: evt.ok === false ? "warn" : "ok" });
+          }
+        } else if (evt.type === "notice" && evt.value) {
+          push("system", "", { meta: [evt.value], tone: "warn" });
+        } else if (evt.type === "done") {
+          setEngine((evt.engine as "llm" | "local") ?? null);
+        }
+      };
+
+      if (STATIC) {
+        try {
+          const { runLocally } = await import("@/lib/localEngine");
+          for await (const evt of runLocally(clean)) handle(evt);
+          flushSentences(true);
+          onDone?.(full);
+        } catch {
+          push("jarvis", "My apologies, sir. Something went wrong.", { tone: "danger" });
+        } finally {
+          setThinking(false);
+        }
+        return;
+      }
+
       try {
         const res = await fetch("/api/chat", {
           method: "POST",

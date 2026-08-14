@@ -23,20 +23,24 @@ const mono = localFont({
   fallback: ["ui-monospace", "SFMono-Regular", "monospace"],
 });
 
+// GitHub Pages serves the site under /<repo>, so absolute asset URLs in
+// metadata need that prefix. Empty for the server build.
+const BP = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
   title: "J.A.R.V.I.S. — Just A Rather Very Intelligent System",
   description:
     "An Iron Man inspired AI assistant: voice control, live knowledge, holographic HUD, arc reactor telemetry and a real tool-calling brain.",
   applicationName: "J.A.R.V.I.S.",
-  manifest: "/manifest.webmanifest",
+  manifest: `${BP}/manifest.webmanifest`,
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: `${BP}/icon.svg`, type: "image/svg+xml" },
+      { url: `${BP}/icon-192.png`, sizes: "192x192", type: "image/png" },
+      { url: `${BP}/icon-512.png`, sizes: "512x512", type: "image/png" },
     ],
     // iOS ignores SVG and manifest icons; it needs an opaque PNG link tag.
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    apple: [{ url: `${BP}/apple-touch-icon.png`, sizes: "180x180" }],
   },
   appleWebApp: { capable: true, title: "JARVIS", statusBarStyle: "black-translucent" },
   formatDetection: { telephone: false },
