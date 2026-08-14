@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+@theme {
+  --color-hud-50: #eafaff;
+  --color-hud-100: #d0f3ff;
+  --color-hud-200: #a6eaff;
+  --color-hud-300: #6ddcff;
+  --color-hud-400: #33c7ff;
+  --color-hud-500: #0aabf0;
+  --color-hud-600: #0088cc;
+  --color-hud-700: #056ba3;
+  --color-hud-800: #0a5883;
+  --color-hud-900: #0d496d;
+
+  --color-amber-hud: #ffb547;
+  --color-danger-hud: #ff4d5e;
+  --color-ok-hud: #3ddc97;
+
+  --color-void: #01060d;
+  --color-void-2: #030d18;
+
+  --font-display: var(--font-orbitron), ui-sans-serif, system-ui, sans-serif;
+  --font-mono-hud: var(--font-mono), ui-monospace, monospace;
+
+  --animate-spin-slow: spin 24s linear infinite;
+  --animate-spin-slower: spin 60s linear infinite;
+  --animate-spin-reverse: spin-reverse 40s linear infinite;
+  --animate-pulse-hud: pulse-hud 3s ease-in-out infinite;
+  --animate-scan: scan 7s linear infinite;
+  --animate-flicker: flicker 6s ease-in-out infinite;
+  --animate-rise: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes pulse-hud {
+  0%,
+  100% {
+    opacity: 0.55;
+    filter: drop-shadow(0 0 6px color-mix(in oklab, var(--color-hud-400) 60%, transparent));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 22px color-mix(in oklab, var(--color-hud-300) 80%, transparent));
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-12%);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.5;
+  }
+  92% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(112%);
+    opacity: 0;
+  }
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  41% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.72;
+  }
+  43% {
+    opacity: 1;
+  }
+  77% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 0.85;
+  }
+  79% {
+    opacity: 1;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--color-hud-500) 50%, transparent) transparent;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background:
+      radial-gradient(1200px 800px at 50% -10%, #06263d 0%, transparent 60%),
+      radial-gradient(900px 700px at 100% 100%, #041c2e 0%, transparent 55%),
+      var(--color-void);
+    color: var(--color-hud-100);
+    font-family: var(--font-mono-hud);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-hud-400) 35%, transparent);
+    color: white;
+  }
+}
+
+@utility hud-panel {
+  position: relative;
+  background: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--color-hud-900) 26%, transparent),
+    color-mix(in oklab, var(--color-void-2) 92%, transparent)
+  );
+  border: 1px solid color-mix(in oklab, var(--color-hud-400) 22%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    inset 0 0 30px color-mix(in oklab, var(--color-hud-500) 8%, transparent),
+    0 0 24px color-mix(in oklab, var(--color-hud-700) 12%, transparent);
+}
+
+@utility hud-clip {
+  clip-path: polygon(
+    14px 0,
+    100% 0,
+    100% calc(100% - 14px),
+    calc(100% - 14px) 100%,
+    0 100%,
+    0 14px
+  );
+}
+
+@utility text-glow {
+  text-shadow:
+    0 0 8px color-mix(in oklab, var(--color-hud-300) 55%, transparent),
+    0 0 24px color-mix(in oklab, var(--color-hud-500) 30%, transparent);
+}
+
+@utility grid-floor {
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--color-hud-400) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--color-hud-400) 8%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 44px 44px;
+}
