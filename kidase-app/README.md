@@ -35,7 +35,15 @@ kidase-app/
 └── *.png               አዶዎች
 ```
 
-## 🚀 ለማስኬድ
+## 🌐 የቀጥታ ሊንክ (Live)
+
+አፑ በጂትሀብ ገጽ (GitHub Pages) ላይ ተሰራጭቶ አለ — በስልክዎ አሳሽ ይክፈቱት፦
+
+- **አፕ፦** https://zolasketch.github.io/Zola-fx-pro/kidase-app/
+- **ማውረጃ ገጽ፦** https://zolasketch.github.io/Zola-fx-pro/kidase-app/download.html
+- **ZIP ፋይል፦** https://zolasketch.github.io/Zola-fx-pro/kidase-app/kidase-app.zip
+
+### 🚀 በኮምፒውተር ለማስኬድ (አማራጭ)
 
 ```bash
 cd kidase-app
