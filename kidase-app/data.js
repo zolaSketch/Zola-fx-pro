@@ -389,9 +389,68 @@ const LITURGICAL_YEAR = [
   { season: 'ዘመነ መስቀል', desc: 'የመስቀል በዓል ወቅት' },
 ];
 
+/* --------------------------------------------------------------------------
+   የቅዳሴ መጠቀሚያ ቃላት / Glossary of liturgical terms
+-------------------------------------------------------------------------- */
+const GLOSSARY = [
+  { ge: 'ቅዳሴ', am: 'ሥርዓተ ቁርባን፤ መቀደስ፣ ማመስገን', en: 'Liturgy / to hallow' },
+  { ge: 'ሥርዓተ ቅዳሴ', am: 'የቁርባን ሥርዓት የተሟላ አገልግሎት', en: 'The Divine Liturgy' },
+  { ge: 'አንፆራ (አኅጉር)', am: 'የቁርባን ምስጋና ጸሎት፣ 14ቱ አንፆራዎች', en: 'Anaphora' },
+  { ge: 'ሳንቅቱስ', am: '«ቅዱስ ቅዱስ ቅዱስ» የመላዕክት ዝማሬ', en: 'Sanctus' },
+  { ge: 'ኤፒክሌሲስ', am: 'መንፈስ ቅዱስ በኅብስቱና በወይኑ ላይ መውረድ', en: 'Epiclesis' },
+  { ge: 'ይረስዮ', am: '«ይውረድበት» — መንፈስ ቅዱስ የመውረድ ጸሎት', en: 'Yeresyo (May it descend)' },
+  { ge: 'አቡነ ዘበሰማያት', am: 'የጌታ ጸሎት — «አባታችን በሰማያት»', en: 'The Lord\'s Prayer' },
+  { ge: 'ነአኲቶ ለገባሬ ሠናያት', am: '«ለበጎ አድራጊ እናመሰግናለን» — የቅዱስ ባስልዮስ ምስጋና', en: 'Thanksgiving of St. Basil' },
+  { ge: 'ትእዛዝ', am: 'የምስጢረ ቁርባን ሥርዓት ትዕዛዝ (የእንጀራና የወይን ቃል)', en: 'Words of Institution' },
+  { ge: 'ጸሎተ ሃይማኖት', am: 'የእምነት መግለጫ (Creed)', en: 'The Creed' },
+  { ge: 'ቃል ኪዳን', am: 'የምሥጢራት ሥርዓት መጽሐፍ', en: 'The Testament' },
+  { ge: 'ጸባኦት', am: 'የሠራዊት (የመላዕክት ሠራዊት ጌታ)', en: 'Sabaoth (of Hosts)' },
+  { ge: 'ሆሣዕና', am: '«አድን እንለምናለን» — የድል ዝማሬ', en: 'Hosanna' },
+  { ge: 'መዘምር', am: 'የቅዳሴ መደምደሚያ በረከት', en: 'Dismissal' },
+  { ge: 'ጸሎተ አኰቴት', am: 'የምስጋና ጸሎት', en: 'Prayer of Thanksgiving' },
+  { ge: 'ጸሎተ ምሕላ', am: 'የልመና ጸሎት', en: 'Prayer of Supplication' },
+  { ge: 'ጸሎተ አንድነት', am: 'የአንድነት ጸሎት', en: 'Prayer of Unity' },
+  { ge: 'ቃለ ምስጢር', am: 'የቁርባን ምስጢር ቃል', en: 'Words of the Mystery' },
+];
+
+/* --------------------------------------------------------------------------
+   የዕለት ንባባት / Daily Readings (ምሳሌያዊ መርሐግብር)
+   A representative cycle: each entry maps an Ethiopian month range to a set
+   of readings. Users follow their parish's official lectionary.
+-------------------------------------------------------------------------- */
+const DAILY_READINGS = [
+  { months: 'ዘመነ መስቀል/ገና', gospel: 'ማቴዎስ 2:1-12 — የጥበበኞች ምጽአት', epistle: 'ሮሜ 15:8-13', psalm: 'መዝሙር 72', ot: 'ኢሳይያስ 9:1-7' },
+  { months: 'ዘመነ ጥምቀት', gospel: 'ዮሐንስ 1:29-34 — የእግዚአብሔር በግ', epistle: 'ቲቶ 2:11-14', psalm: 'መዝሙር 29', ot: 'ኢሳይያስ 40:1-5' },
+  { months: 'ዐቢይ ጾም', gospel: 'ማርቆስ 1:12-13 — የክርስቶስ ፈተና', epistle: '2 ቆሮንቶስ 6:1-10', psalm: 'መዝሙር 51', ot: 'ዘዳግም 8:1-10' },
+  { months: 'ሕማማት', gospel: 'ማቴዎስ 26-27 — ሕማማት', epistle: 'ዕብራውያን 9:11-15', psalm: 'መዝሙር 22', ot: 'ኢሳይያስ 53:1-12' },
+  { months: 'ዘመነ ትንሣኤ', gospel: 'ማቴዎስ 28:1-10 — ትንሣኤ', epistle: '1 ቆሮንቶስ 15:1-11', psalm: 'መዝሙር 118', ot: 'ዘፍጥረት 1:1-5' },
+  { months: 'ዘመነ ሐዋርያት', gospel: 'ዮሐንስ 14:15-26 — መንፈስ ቅዱስ', epistle: 'ሐዋርያት 2:1-21', psalm: 'መዝሙር 104', ot: 'ኢዮቤልዩ 11:7-9' },
+  { months: 'ዘመነ ፍልሰታ', gospel: 'ሉቃስ 1:46-55 — መግነጢሱ', epistle: 'ገላትያ 4:4-7', psalm: 'መዝሙር 34', ot: 'ኢሳይያስ 7:10-14' },
+];
+
+/* --------------------------------------------------------------------------
+   ዐሥራ አራቱ አንፆራዎች / The 14 Anaphoras
+-------------------------------------------------------------------------- */
+const ANAPHORAS = [
+  { name: 'ቅዳሴ ዘሐዋርያት', note: 'የሐዋርያት ቅዳሴ — የቁርባን ትዕዛዝ መሠረት' },
+  { name: 'ቅዳሴ ዘአቡነ ኢየሱስ ክርስቶስ', note: 'የጌታችን ቅዳሴ' },
+  { name: 'ቅዳሴ ዘእግዝእትነ ማርያም', note: 'የእመቤታችን የማርያም ቅዳሴ' },
+  { name: 'ቅዳሴ ዘአትናቴዎስ', note: 'የአትናቴዎስ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘባስልዮስ', note: 'የባስልዮስ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘጎርጎርዮስ', note: 'የጎርጎርዮስ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘያዕቆብ', note: 'የያዕቆብ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘዮሐንስ ወንጌላዊ', note: 'የዮሐንስ ወንጌላዊ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘቄርሎስ', note: 'የቄርሎስ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘዮሐንስ አፈወርቅ', note: 'የዮሐንስ አፈወርቅ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘዲዮስቆሮስ', note: 'የዲዮስቆሮስ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘኤጲፋንዮስ', note: 'የኤጲፋንዮስ ቅዳሴ' },
+  { name: 'ቅዳሴ ዘሠለስቱ ምዕት', note: 'የሦስት መቶ (318) ሊቃውንት ቅዳሴ' },
+  { name: 'ቅዳሴ ዘኢያሬቅ', note: 'የኢያሬቅ ቅዳሴ' },
+];
+
 /* Global data object exposed to app.js */
 const QIDASSE_DATA = {
-  version: '1.0.0',
+  version: '2.0.0',
   zema: ZEMA,
   speaker: SPEAKER,
   quiz: QUIZ,
@@ -400,4 +459,7 @@ const QIDASSE_DATA = {
     lent: LITURGY_LENT,
   },
   liturgicalYear: LITURGICAL_YEAR,
+  glossary: GLOSSARY,
+  dailyReadings: DAILY_READINGS,
+  anaphoras: ANAPHORAS,
 };

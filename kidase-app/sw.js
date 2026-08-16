@@ -1,11 +1,14 @@
 /* የቅዳሴ መልመጃ አፕ — Service Worker (offline support) */
-const CACHE = 'kidase-v1';
+const CACHE = 'kidase-v2';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './data.js',
+  './ethdate.js',
+  './zema.js',
+  './syllabary.js',
   './manifest.webmanifest',
   './icon-192.png',
   './icon-512.png',

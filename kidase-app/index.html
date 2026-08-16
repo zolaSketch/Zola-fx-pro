@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>የቅዳሴ መልመጃ አፕ</title>
-  <meta name="description" content="የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን የቅዳሴ መልመጃ አፕ — የእሁድና የጾም ቅዳሴ" />
-  <meta name="theme-color" content="#8b3a3a" />
+  <meta name="description" content="የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን የቅዳሴ መልመጃ አፕ — የእሁድና የጾም ቅዳሴ ከነ ዜማ" />
+  <meta name="theme-color" content="#7d2f2f" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon-192.png" type="image/png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
@@ -14,20 +14,23 @@
 <body class="theme-light">
   <div id="app">
     <nav class="topnav">
-      <div class="brand">
-        <span class="brand-ic">⛪</span>
-        <span>የቅዳሴ መልመጃ</span>
-      </div>
-      <div class="nav">
-        <button class="nav-item" data-view="home" title="መነሻ"><span>🏠</span><span class="nav-label">መነሻ</span></button>
-        <button class="nav-item" data-view="practice" title="ማለመድ"><span>📖</span><span class="nav-label">ማለመድ</span></button>
-        <button class="nav-item" data-view="quiz" title="ፈተና"><span>🧠</span><span class="nav-label">ፈተና</span></button>
-        <button class="nav-item" data-view="progress" title="ሂደት"><span>📊</span><span class="nav-label">ሂደት</span></button>
-        <button class="nav-item" data-view="settings" title="ቅንብሮች"><span>⚙️</span><span class="nav-label">ቅንብር</span></button>
-      </div>
+      <div class="brand"><span class="brand-ic">⛪</span><span>የቅዳሴ መልመጃ</span></div>
     </nav>
     <main id="content"></main>
   </div>
+
+  <nav class="bottomnav">
+    <button class="nav-item" data-view="home"><span>🏠</span><span class="nav-label">መነሻ</span></button>
+    <button class="nav-item" data-view="practice"><span>📖</span><span class="nav-label">ማለመድ</span></button>
+    <button class="nav-item" data-view="readings"><span>📖</span><span class="nav-label">ንባብ</span></button>
+    <button class="nav-item" data-view="quiz"><span>🧠</span><span class="nav-label">ፈተና</span></button>
+    <button class="nav-item" data-view="progress"><span>📊</span><span class="nav-label">ሂደት</span></button>
+    <button class="nav-item" data-view="settings"><span>⚙️</span><span class="nav-label">ቅንብር</span></button>
+  </nav>
+
+  <script src="ethdate.js"></script>
+  <script src="zema.js"></script>
+  <script src="syllabary.js"></script>
   <script src="data.js"></script>
   <script src="app.js"></script>
 </body>
