@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="am">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f6f2">
+  <meta name="description" content="Zola AI Council — ብዙ ነፃ open-weight AI ሞዴሎችን መርጦ መልሳቸውን የሚያዋህድ የድር AI ረዳት">
+  <title>Zola AI Council — Open-model collective intelligence</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#chatMain">ወደ ውይይት ዝለል</a>
+
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar" aria-label="የውይይት ዝርዝር">
+      <div class="brand-row">
+        <a class="brand" href="./" aria-label="Zola AI መነሻ">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M16 3.5 19.1 12l8.4 3.2-8.4 3.1L16 27l-3.1-8.7-8.4-3.1 8.4-3.2L16 3.5Z"/><circle cx="25.5" cy="6.5" r="2.2"/></svg>
+          </span>
+          <span>ZOLA <b>AI</b></span>
+        </a>
+        <button class="icon-button sidebar-close" id="closeSidebarBtn" type="button" aria-label="ዝርዝሩን ዝጋ">
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <button class="new-chat-button" id="newChatBtn" type="button">
+        <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>አዲስ ውይይት</span>
+        <kbd>Ctrl K</kbd>
+      </button>
+
+      <label class="chat-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <span class="sr-only">ውይይት ፈልግ</span>
+        <input id="chatSearchInput" type="search" placeholder="ውይይት ፈልግ…" autocomplete="off">
+      </label>
+
+      <nav class="conversation-nav" id="conversationList" aria-label="ውይይቶች"></nav>
+
+      <div class="sidebar-footer">
+        <button class="sidebar-action" id="knowledgeBtn" type="button">
+          <span class="action-icon violet"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"/><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"/></svg></span>
+          <span><b>የእውቀት ማዕከል</b><small id="knowledgeCount">ምንም ፋይል የለም</small></span>
+        </button>
+        <button class="sidebar-action" id="settingsBtn" type="button">
+          <span class="action-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21h-4v-.08a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3v-4h.08a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.63a1.7 1.7 0 0 0 1-1.55V3h4v.08a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.37 9a1.7 1.7 0 0 0 1.55 1H21v4h-.08a1.7 1.7 0 0 0-1.52 1Z"/></svg></span>
+          <span><b>ማስተካከያ</b><small>ቋንቋ፣ AI Council፣ ባህሪ</small></span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button menu-button" id="menuBtn" type="button" aria-label="ዝርዝሩን ክፈት">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <button class="conversation-title" id="conversationTitleBtn" type="button" title="ርዕሱን ቀይር">
+            <span id="conversationTitle">አዲስ ውይይት</span>
+            <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        </div>
+        <div class="topbar-actions">
+          <div class="privacy-pill" title="AI model ወደ መሣሪያዎ አይወርድም">
+            <span></span> MODEL DOWNLOAD የለም
+          </div>
+          <button class="model-pill" id="modelBtn" type="button">
+            <span class="model-dot" id="modelDot"></span>
+            <span id="modelPillText">ነፃ AIዎችን ያገናኙ</span>
+            <svg viewBox="0 0 24 24"><path d="m8 10 4 4 4-4"/></svg>
+          </button>
+          <button class="icon-button" id="exportBtn" type="button" aria-label="ውይይቱን አውርድ" title="ውይይቱን አውርድ">
+            <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="chat-main" id="chatMain">
+        <div class="chat-column">
+          <section class="welcome" id="welcomePanel" aria-labelledby="welcomeTitle">
+            <div class="local-badge"><span></span> OPEN MODELS · AI COUNCIL · $0</div>
+            <div class="hero-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64"><path d="M32 6 38 25l19 7-19 7-6 19-6-19-19-7 19-7 6-19Z"/><circle cx="51" cy="13" r="4"/></svg>
+            </div>
+            <h1 id="welcomeTitle">ሰላም፣ እኛ <span>Zola Council</span> ነን።</h1>
+            <p class="welcome-subtitle">ጥያቄዎን ለብዙ ነፃ open-weight AIዎች እንሰጣለን።<br>መልሶቻቸውን አወዳድረን አንድ የተሻለ መልስ እናዘጋጃለን።</p>
+
+            <div class="first-run-notice" id="firstRunNotice">
+              <div class="notice-icon"><svg viewBox="0 0 24 24"><path d="M5 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM12 20a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/><path d="m8 10 2 3m6-3-2 3"/></svg></div>
+              <div>
+                <strong>ነፃውን AI Council ያገናኙ</strong>
+                <p>Model አይወርድም። ያለክፍያ OpenRouter key ብቻ ያስፈልጋል፤ በchat ውስጥ keyዎን አይላኩ።</p>
+              </div>
+              <button id="welcomeLoadBtn" class="primary-button" type="button">በነፃ አገናኝ</button>
+            </div>
+
+            <div class="suggestion-grid">
+              <button class="suggestion-card" type="button" data-prompt="Synthetic data ምንድነው? በቀላል አማርኛ ከምሳሌዎች ጋር አስረዳኝ።">
+                <span class="suggestion-icon purple"><svg viewBox="0 0 24 24"><path d="M9 3h6l1 5 4 3-2 7H6l-2-7 4-3 1-5Z"/><path d="M9 13h6M12 10v6"/></svg></span>
+                <span><b>ነገር አስረዳኝ</b><small>ውስብስብ ርዕስን በቀላሉ</small></span>
+                <svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+              <button class="suggestion-card" type="button" data-prompt="ለአንድ ዘመናዊ የኢትዮጵያ ቴክኖሎጂ ንግድ የአንድ ገጽ የቢዝነስ እቅድ ጻፍልኝ።">
+                <span class="suggestion-icon orange"><svg viewBox="0 0 24 24"><path d="M4 19.5V5a2 2 0 0 1 2-2h9l5 5v11.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5Z"/><path d="M14 3v6h6M8 13h8M8 17h6"/></svg></span>
+                <span><b>ጽሑፍ ፍጠር</b><small>እቅድ፣ ደብዳቤ ወይም ሪፖርት</small></span>
+                <svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+              <button class="suggestion-card" type="button" data-prompt="በHTML፣ CSS እና JavaScript ቀላል የሥራ ዝርዝር (todo) app ጻፍና ኮዱን አስረዳ።">
+                <span class="suggestion-icon blue"><svg viewBox="0 0 24 24"><path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg></span>
+                <span><b>ኮድ ጻፍ</b><small>ንድፍ፣ coding እና debugging</small></span>
+                <svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+              <button class="suggestion-card" type="button" data-prompt="የሳምንቱን ሥራዬን በጥሩ ሁኔታ ለማቀድ ቅድሚያ የሚሰጥ ተግባራዊ እቅድ አዘጋጅልኝ።">
+                <span class="suggestion-icon green"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
+                <span><b>እቅድ አውጣ</b><small>ሥራን ከፋፍልና አደራጅ</small></span>
+                <svg class="arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          </section>
+
+          <section class="messages" id="messages" aria-live="polite" aria-label="የውይይት መልዕክቶች"></section>
+        </div>
+      </main>
+
+      <div class="composer-zone">
+        <div class="generation-status" id="generationStatus" hidden>
+          <span class="status-spinner"></span><span id="generationStatusText">እያሰበ ነው…</span>
+        </div>
+        <form class="composer" id="composerForm">
+          <div class="attachment-list" id="attachmentList" hidden></div>
+          <textarea id="promptInput" rows="1" maxlength="12000" placeholder="Zolaን ምንም ነገር ይጠይቁ…" aria-label="መልዕክት"></textarea>
+          <div class="composer-toolbar">
+            <div class="composer-tools">
+              <button class="tool-button" id="attachBtn" type="button" title="የጽሑፍ ፋይል ያያይዙ" aria-label="ፋይል አያይዝ">
+                <svg viewBox="0 0 24 24"><path d="m12 19 7-7a5 5 0 0 0-7-7l-8 8a3.5 3.5 0 0 0 5 5l8-8a2 2 0 0 0-3-3l-8 8"/></svg>
+              </button>
+              <button class="tool-button" id="micBtn" type="button" title="በድምፅ ይጻፉ" aria-label="ማይክሮፎን">
+                <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+              </button>
+              <button class="mode-button" id="councilModeBtn" type="button" aria-pressed="true" title="ብዙ AIዎች ተለያይተው መልስ ከሰጡ በኋላ ውጤቱ ይዋሃዳል">
+                <svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="3"/><circle cx="19" cy="7" r="3"/><circle cx="12" cy="17" r="3"/><path d="m7.5 9 2.5 5m6.5-5L14 14"/></svg>
+                AI Council
+              </button>
+            </div>
+            <div class="composer-send">
+              <span class="shortcut-hint">Enter ለመላክ</span>
+              <button class="send-button" id="sendBtn" type="submit" aria-label="ላክ">
+                <svg viewBox="0 0 24 24"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></svg>
+              </button>
+              <button class="stop-button" id="stopBtn" type="button" aria-label="ማመንጨት አቁም" hidden>
+                <span></span>
+              </button>
+            </div>
+          </div>
+        </form>
+        <p class="composer-note">Zola ሊሳሳት ይችላል። አስፈላጊ መረጃን ያረጋግጡ። <button id="privacyInfoBtn" type="button">ስለ ግላዊነት</button></p>
+      </div>
+    </section>
+  </div>
+
+  <input id="fileInput" type="file" accept=".txt,.md,.csv,.json,.html,.js,.css,.py" multiple hidden>
+  <input id="knowledgeFileInput" type="file" accept=".txt,.md,.csv,.json,.html" multiple hidden>
+
+  <dialog class="app-dialog model-dialog" id="modelDialog">
+    <form method="dialog" class="dialog-card">
+      <header class="dialog-header">
+        <div>
+          <span class="eyebrow">FREE CLOUD AI COUNCIL</span>
+          <h2>Open-source AIዎችን አንድ ላይ ያገናኙ</h2>
+          <p>Model ወደ ኮምፒውተርዎ አይወርድም። OpenRouter ላይ ያሉ ነፃ open-weight ሞዴሎች በcloud ይሠራሉ።</p>
+        </div>
+        <button class="dialog-close" value="cancel" aria-label="ዝጋ" type="submit">
+          <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+
+      <div class="compatibility" id="connectionStatusBox">
+        <span class="compat-icon"><svg viewBox="0 0 24 24"><path d="M6 18h11a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 8.7 4.7 4.7 0 0 0 6 18Z"/></svg></span>
+        <div><strong id="connectionStatusTitle">ለመገናኘት ዝግጁ</strong><p id="connectionStatusText">ክፍያ ወይም credit card ሳያስፈልግ ነፃ key መፍጠር ይችላሉ።</p></div>
+      </div>
+
+      <div class="api-key-panel">
+        <label class="field-label" for="apiKeyInput">OpenRouter API key
+          <div class="secret-input-wrap">
+            <input id="apiKeyInput" type="password" autocomplete="off" spellcheck="false" placeholder="sk-or-v1-…">
+            <button id="toggleKeyBtn" type="button">አሳይ</button>
+          </div>
+        </label>
+        <div class="key-help-row">
+          <label class="remember-key"><input id="rememberKeyInput" type="checkbox"> በዚህ browser ላይ አስታውስ</label>
+          <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">ነፃ key ፍጠር ↗</a>
+        </div>
+        <p class="key-security"><svg viewBox="0 0 24 24"><path d="M7 10V7a5 5 0 0 1 10 0v3M5 10h14v11H5V10Z"/></svg> Keyዎ ወደ Zola server አይላክም፤ ከbrowserዎ በቀጥታ ወደ OpenRouter ይላካል። Keyዎን በchat ውስጥ አይጻፉ።</p>
+      </div>
+
+      <div class="council-explainer">
+        <div class="council-step"><span>1</span><b>Router</b><small>ከሁሉም ነፃ ሞዴሎች ለጥያቄዎ ተስማሚዎቹን ይመርጣል</small></div>
+        <div class="council-step"><span>2</span><b>Council</b><small>የተለያዩ AIዎች በተናጠል ያስባሉ</small></div>
+        <div class="council-step"><span>3</span><b>Chair</b><small>መልሶቹን አወዳድሮ አንድ ውጤት ያዘጋጃል</small></div>
+      </div>
+
+      <div class="free-catalog" id="freeCatalogPanel">
+        <span class="catalog-count" id="availableModelsCount">…</span>
+        <span><b>የታወቁ open-weight ነፃ ሞዴሎች</b><small id="availableModelsText">Qwen፣ Llama፣ Gemma፣ Nemotron፣ GPT-OSS እና ሌሎች · live catalog</small></span>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="danger-text-button" id="disconnectBtn" type="button" hidden>ግንኙነት አቋርጥ</button>
+        <button class="text-button" value="cancel" type="submit">አሁን አይደለም</button>
+        <button class="primary-button wide-button" id="connectBtn" type="button">
+          <svg viewBox="0 0 24 24"><path d="M8 12h8M13 7l5 5-5 5M6 5H4v14h2"/></svg>
+          ነፃ AI Council አገናኝ
+        </button>
+      </div>
+      <p class="model-disclaimer">ነፃው tier usage limit አለው፣ ሞዴሎችም ከጊዜ ወደ ጊዜ ሊቀየሩ ይችላሉ። Council mode በአንድ ጥያቄ ብዙ free requests ይጠቀማል።</p>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog" id="settingsDialog">
+    <form method="dialog" class="dialog-card settings-card">
+      <header class="dialog-header">
+        <div><span class="eyebrow">PERSONALIZE</span><h2>ማስተካከያ</h2><p>Zola እንዴት እንዲመልስ ይቆጣጠሩ።</p></div>
+        <button class="dialog-close" value="cancel" aria-label="ዝጋ" type="submit"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      </header>
+      <div class="settings-form">
+        <label class="field-label">የመልስ ቋንቋ
+          <select id="languageSelect">
+            <option value="auto">ከጥያቄው ጋር ተመሳሳይ</option>
+            <option value="am">አማርኛ</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <label class="field-label">የፈጠራ ደረጃ <span id="temperatureValue">0.7</span>
+          <input id="temperatureInput" type="range" min="0.1" max="1.4" value="0.7" step="0.1">
+          <span class="range-labels"><small>ትክክለኛ</small><small>ፈጣሪ</small></span>
+        </label>
+        <label class="field-label">በCouncil ውስጥ የሚሳተፉ AIዎች
+          <select id="councilSizeSelect">
+            <option value="2">2 AI — ፈጣን፣ 3 free requests</option>
+            <option value="3" selected>3 AI — ሚዛናዊ፣ 4 free requests</option>
+            <option value="4">4 AI — ጥልቅ፣ 5 free requests</option>
+          </select>
+        </label>
+        <label class="field-label">ለZola ቋሚ መመሪያ
+          <textarea id="systemPromptInput" rows="5" maxlength="3000" placeholder="ለምሳሌ፦ ሁልጊዜ በአጭሩ መልስ…"></textarea>
+        </label>
+        <label class="toggle-row">
+          <span><b>የድምፅ መልስ</b><small>መልስ ሲጨርስ በድምፅ ያንብብ</small></span>
+          <input id="autoSpeakInput" type="checkbox"><span class="toggle"></span>
+        </label>
+      </div>
+      <div class="settings-connection-row">
+        <span><b>OpenRouter ግንኙነት</b><small id="settingsConnectionText">አልተገናኘም</small></span>
+        <button class="text-button bordered" id="manageConnectionBtn" type="button">ግንኙነት አስተካክል</button>
+      </div>
+      <div class="dialog-actions spread">
+        <button class="danger-text-button" id="clearAllBtn" type="button">ውይይትና እውቀት አጥፋ</button>
+        <button class="primary-button" id="saveSettingsBtn" type="button">አስቀምጥ</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog" id="knowledgeDialog">
+    <form method="dialog" class="dialog-card knowledge-card">
+      <header class="dialog-header">
+        <div><span class="eyebrow">KNOWLEDGE RETRIEVAL</span><h2>የእውቀት ማዕከል</h2><p>የራስዎን ጽሑፍ በመጨመር Zola በፋይሎቹ መሠረት እንዲመልስ ያድርጉ።</p></div>
+        <button class="dialog-close" value="cancel" aria-label="ዝጋ" type="submit"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      </header>
+      <button class="drop-zone" id="knowledgeDropZone" type="button">
+        <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5"/></svg>
+        <b>ፋይል ይምረጡ ወይም እዚህ ይጣሉ</b>
+        <small>TXT, Markdown, CSV, JSON ወይም HTML · እስከ 2 MB</small>
+      </button>
+      <div class="knowledge-list" id="knowledgeList"></div>
+      <div class="knowledge-tip"><b>እንዴት ይሠራል?</b><p>ፋይሉ በbrowserዎ ውስጥ ይቀመጣል። ከጥያቄዎ ጋር የሚዛመዱ ክፍሎች ብቻ ለcloud AI Council ይላካሉ። ሚስጥራዊ መረጃ አያስገቡ።</p></div>
+    </form>
+  </dialog>
+
+  <dialog class="app-dialog compact-dialog" id="privacyDialog">
+    <form method="dialog" class="dialog-card">
+      <header class="dialog-header"><div><span class="eyebrow">PRIVACY</span><h2>Cloud AI የግላዊነት መረጃ</h2></div><button class="dialog-close" value="cancel" aria-label="ዝጋ" type="submit"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+      <div class="privacy-copy">
+        <p><b>ወደ ኮምፒውተርዎ AI model አይወርድም።</b> ውይይት ታሪክና ፋይሎች በbrowserዎ ውስጥ ይቀመጣሉ።</p>
+        <p>መልስ ለማመንጨት ጥያቄዎ፣ የቅርብ ውይይት፣ attachment እና ተዛማጅ የእውቀት ክፍሎች ወደ OpenRouter እና ወደ መረጠው cloud model provider ይላካሉ። ሚስጥራዊ ወይም የግል መረጃ አያስገቡ።</p>
+        <p>API keyዎ በZola code ወይም server ውስጥ አይቀመጥም። “አስታውስ” ካልመረጡ session ሲዘጋ ይጠፋል። የዳታ አጠቃቀም በOpenRouter account privacy settings እና በተመረጠው provider ደንብ ይመራል።</p>
+      </div>
+      <div class="dialog-actions"><button class="primary-button" value="ok" type="submit">ገብቶኛል</button></div>
+    </form>
+  </dialog>
+
+  <div class="toast-region" id="toastRegion" aria-live="assertive"></div>
+
+  <script src="app.bundle.js"></script>
+</body>
+</html>

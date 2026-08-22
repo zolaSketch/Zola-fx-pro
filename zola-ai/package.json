@@ -1,0 +1,16 @@
+{
+  "name": "zola-local-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "No-model-download AI council that synthesizes multiple free open-weight cloud models",
+  "scripts": {
+    "start": "python3 -m http.server 4173 --bind 0.0.0.0",
+    "test": "node --test core.test.mjs",
+    "check": "npm run build && node --check app.bundle.js && node --check app.js && node --check core.js && node --test core.test.mjs",
+    "build": "esbuild app.js --bundle --format=iife --target=es2020 --outfile=app.bundle.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
