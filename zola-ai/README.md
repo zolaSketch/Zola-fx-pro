@@ -37,10 +37,14 @@ OpenRouter's free tier is rate-limited and the free model roster changes. Counci
 
 No model weights are downloaded. Chats and knowledge documents are stored in browser local storage. To generate an answer, the latest question, relevant conversation context, attachments, and retrieved knowledge excerpts are sent to OpenRouter and the cloud inference providers selected for that request. Users should not submit secrets or sensitive personal data and should review their OpenRouter privacy settings.
 
-## Run
+## Build and run
+
+`app.js` and `core.js` are the maintainable source modules. The browser loads the generated classic-script bundle so the app also works on static hosts and HTML preview services that do not serve ES modules with the correct MIME type.
 
 ```bash
 cd zola-ai
+npm install
+npm run build
 python3 -m http.server 4173 --bind 0.0.0.0
 ```
 
@@ -51,3 +55,5 @@ Open `http://localhost:4173` or deploy the directory to any static HTTPS host.
 ```bash
 npm run check
 ```
+
+`npm run check` rebuilds `app.bundle.js`, validates the source and bundle syntax, and runs the core routing tests.

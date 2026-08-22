@@ -7,6 +7,10 @@
   "scripts": {
     "start": "python3 -m http.server 4173 --bind 0.0.0.0",
     "test": "node --test core.test.mjs",
-    "check": "node --check app.js && node --check core.js && node --test core.test.mjs"
+    "check": "npm run build && node --check app.bundle.js && node --check app.js && node --check core.js && node --test core.test.mjs",
+    "build": "esbuild app.js --bundle --format=iife --target=es2020 --outfile=app.bundle.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
   }
 }
