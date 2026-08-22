@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>የቅዳሴ መልመጃ አፕ — ማውረድ</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .dl-wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+    .dl-hero { text-align: center; padding: 20px 0 8px; }
+    .dl-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+    .dl-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff;
+      border: none; border-radius: 12px; padding: 15px 28px; font-size: 16px; font-weight: 800;
+      cursor: pointer; text-decoration: none; font-family: inherit; box-shadow: 0 8px 22px rgba(139,58,58,.35);
+    }
+    .dl-btn:hover { filter: brightness(1.05); }
+    .step { display: flex; gap: 12px; margin-bottom: 12px; }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-weight: 800; flex-shrink: 0; }
+    code { background: var(--bg); padding: 2px 6px; border-radius: 6px; font-size: 13px; }
+    pre { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; font-size: 13px; }
+    .kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; font-size: 12px; background: var(--bg2); }
+    .note { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .back { display: inline-block; margin-top: 8px; color: var(--accent); text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body class="theme-light">
+  <div class="dl-wrap">
+    <div class="dl-hero">
+      <div style="font-size:52px">⛪</div>
+      <h1>የቅዳሴ መልመጃ አፕ</h1>
+      <p class="note">የኢትዮጵያ ኦርቶዶክስ ተዋሕዶ ቤተ ክርስቲያን የቅዳሴ መለማመጃ አፕሊኬሽን</p>
+      <div style="margin:18px 0">
+        <a class="dl-btn" href="kidase-app.zip" download="kidase-app.zip">⬇️ ሙሉውን አፕ ውረድ (ZIP)</a>
+      </div>
+      <p class="note">መጠን፦ ~0.9 MB · ከመስመር ውጭ የሚሠራ (PWA)</p>
+    </div>
+
+    <div class="dl-card">
+      <h2>📱 በመሣሪያዎ ለመጫን (Install as App)</h2>
+      <div class="step"><div class="step-num">1</div><div>የቅዳሴ መልመጃ ገጹን በአሳሽዎ ይክፈቱ።</div></div>
+      <div class="step"><div class="step-num">2</div><div>በአሳሹ ምናሌ ውስጥ <b>«አፕ ጫን» (Add to Home Screen / Install App)</b> የሚለውን ይጫኑ።</div></div>
+      <div class="step"><div class="step-num">3</div><div>አፑ በመነሻ ገጽዎ ላይ ይታያልና እንደ ሌላ አፕ ይከፈታል።</div></div>
+    </div>
+
+    <div class="dl-card">
+      <h2>📂 የZIP ፋይል በስልክ ለማውረድ</h2>
+      <p class="note">«⬇️ ሙሉውን አፕ ውረድ» ቁልፉን ጠቅ ያድርጉ። ፋይሉ ወደ ስልክዎ <b>የፋይል መተግበሪያ (Files)</b> ይወርዳል።</p>
+      <p class="note">ከወረደ በኋላ በFiles ይክፈቱ → ZIP ያውጡ (Extract) → <code>index.html</code> ላይ ጠቅ ያድርጉ → በአሳሽዎ ይከፈታል።</p>
+    </div>
+
+    <div class="dl-card">
+      <h2>⌨️ ቁልፍ ሰሌዳ አቋራጮች</h2>
+      <p class="note">
+        <span class="kbd">⬇</span> / <span class="kbd">→</span> / <span class="kbd">Space</span> / <span class="kbd">Enter</span> — ቀጣይ መስመር<br>
+        <span class="kbd">⬆</span> / <span class="kbd">←</span> — ቀዳሚ መስመር
+      </p>
+    </div>
+
+    <div class="dl-card">
+      <h2>ℹ️ የተካተቱ ፋይሎች</h2>
+      <p class="note">index.html · style.css · app.js · data.js · manifest.webmanifest · sw.js · README.md · 4 አዶዎች (PNG)</p>
+      <p class="note" style="margin-top:8px;font-size:12px">⚠️ ጸሎቱ ለመልመጃ/ትምህርት የተዘጋጀ ነው፤ ለትክክለኛው ሥርዓት የቤተ ክርስቲያንን መጽሐፈ ቅዳሴ ይጠቀሙ።</p>
+    </div>
+
+    <a class="back" href="index.html">← ወደ አፕ ተመለስ</a>
+  </div>
+</body>
+</html>
