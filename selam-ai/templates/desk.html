@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}የክሊኒክ ጠረጴዛ — ሰላም{% endblock %}
+{% block body %}
+<div class="wrap page">
+  <nav class="nav">
+    <a class="brand" href="/"><span class="logo">ሰ</span> {{ clinic.name }}</a>
+    <div class="nav-links">
+      <a class="btn ghost" href="/call">ሙከራ ደውል</a>
+    </div>
+  </nav>
+  <h1 style="font-size:32px;margin:10px 0">ዛሬ የተያዙ ቀጠሮዎች</h1>
+  <p class="hint">ሰላም ስትይዝ እዚህ ይወጣል። ይህን ሐኪሙ ጠዋት ይመለከታል። ስልክ ቁጥር ለመቀየር ከታች ጻፍ።</p>
+
+  <div class="card" style="margin-bottom:18px;overflow:auto">
+    <table class="table" id="tbl">
+      <thead>
+        <tr><th>ቀን</th><th>ሰዓት</th><th>ስም</th><th>ስልክ</th><th>አገልግሎት</th><th>ሁኔታ</th></tr>
+      </thead>
+      <tbody>
+        {% for a in appointments %}
+        <tr>
+          <td>{{ a.date }}</td>
+          <td>{{ a.time }}</td>
+          <td>{{ a.name }}</td>
+          <td>{{ a.phone }}</td>
+          <td>{{ a.service }}</td>
+          <td><span class="badge">ተይዟል</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6">ገና ቀጠሮ የለም። ወደ «ሙከራ ደውል» ሂደህ አንድ ይዘህ ተመለስ።</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <h3>የክሊኒክ መረጃ</h3>
+      <p class="hint">ስምህን ብትቀይር ሰላም በአዲሱ ስም ትመልሳለች።</p>
+      <form id="cfg">
+        <div class="field" style="margin:8px 0"><input name="name" value="{{ clinic.name }}" placeholder="የክሊኒክ ስም" /></div>
+        <div class="field" style="margin:8px 0"><input name="phone" value="{{ clinic.phone }}" placeholder="ስልክ" /></div>
+        <div class="field" style="margin:8px 0"><input name="address" value="{{ clinic.address }}" placeholder="አድራሻ" /></div>
+        <div class="field" style="margin:8px 0"><input name="hours" value="{{ clinic.hours }}" placeholder="የስራ ሰዓት" /></div>
+        <button class="btn" type="submit">አስቀምጥ</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>እንዴት ትጠቀማለህ</h3>
+      <p class="hint">1) ደንበኛው «አሁን ደውል»ን ይከፍታል ወይም በኋላ በእውነተኛ ስልክ ይደውላል።<br/>2) ሰላም ቀጠሮ ትይዛለች።<br/>3) አንተ ይህን ገጽ በስልክህ ትከፍታለህ።</p>
+    </div>
+    <div class="card">
+      <h3>ቀጣይ</h3>
+      <p class="hint">አሁን በድረ-ገጽ ነው። የእውነተኛ ስልክ መስመር ስናገናኝ፣ ደንበኛው የክሊኒክህን 09 ቁጥር ሲደውል ይህች ሰላም ትመልሳለች። አእምሯ አንድ ነው።</p>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById("cfg").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(e.target);
+  const body = Object.fromEntries(fd.entries());
+  await fetch("/api/clinic", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  alert("ተቀይሯል። እንደገና ስትደውል በአዲሱ ስም ትመልሳለች።");
+});
+</script>
+{% endblock %}

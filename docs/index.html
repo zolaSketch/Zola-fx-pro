@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>ሰላም — AI ተቀባይ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Ethiopic:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#14110e; --gold:#e8c57c; --cream:#f6efe3; --mute:#b7aa98; --card:#241f19; --line:rgba(232,197,124,.18); }
+    * { box-sizing: border-box; }
+    html, body { margin:0; min-height:100%; background:#14110e; color:var(--cream);
+      font-family:"Noto Sans Ethiopic", sans-serif; }
+    body { background: radial-gradient(800px 420px at 10% -8%, rgba(232,197,124,.14), transparent 50%), var(--bg); }
+    .wrap { width:min(430px,100%); margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; padding:12px 12px 18px; }
+    header { display:flex; justify-content:space-between; align-items:center; padding:6px 4px 10px; }
+    .brand { font-weight:700; }
+    .tabs { display:flex; gap:8px; }
+    .tabs button { border:1px solid var(--line); background:transparent; color:var(--cream); border-radius:999px; padding:8px 12px; font:inherit; }
+    .tabs button.on { background:var(--gold); color:#2a1d0d; }
+    .phone { flex:1; background:#0c0a08; border:1px solid var(--line); border-radius:28px; padding:14px; display:flex; flex-direction:column; min-height:70dvh; }
+    .who { text-align:center; padding:8px 0 12px; }
+    .av { width:78px; height:78px; border-radius:50%; margin:0 auto 8px; display:grid; place-items:center;
+      background:linear-gradient(145deg,#f0d090,#8a5a22); color:#2a1d0d; font-size:30px; font-weight:800;
+      box-shadow:0 0 0 0 rgba(232,197,124,.4); animation:p 1.8s infinite; }
+    @keyframes p { 70% { box-shadow:0 0 0 16px transparent; } }
+    .name { font-size:20px; font-weight:700; }
+    .role { color:var(--mute); font-size:13px; }
+    #log { flex:1; overflow:auto; display:flex; flex-direction:column; gap:8px; padding:6px 2px 10px; }
+    .b { max-width:90%; padding:10px 12px; border-radius:16px; font-size:15px; line-height:1.45; }
+    .ai { background:#3a3126; align-self:flex-start; }
+    .me { background:#6d5428; align-self:flex-end; }
+    form { display:flex; gap:8px; }
+    input { flex:1; border:1px solid var(--line); background:#100e0b; color:var(--cream); border-radius:14px; padding:12px; font:inherit; }
+    .mic, .go { width:48px; height:48px; border:0; border-radius:50%; background:var(--gold); color:#2a1d0d; font-size:18px; }
+    .mic.live { background:#d97a6a; color:#fff; }
+    .desk { display:none; padding:8px 2px 40px; }
+    .desk.on { display:block; }
+    .call.on, .call { }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; margin:10px 0; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    td, th { text-align:left; padding:8px 4px; border-bottom:1px solid var(--line); }
+    .hint { color:var(--mute); font-size:13px; }
+    h1 { font-size:22px; margin:8px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">ሰላም ተቀባይ</div>
+      <div class="tabs">
+        <button class="on" id="tCall" type="button">ስልክ</button>
+        <button id="tDesk" type="button">ጠረጴዛ</button>
+      </div>
+    </header>
+
+    <section class="phone call" id="callView">
+      <div class="who">
+        <div class="av">ሰ</div>
+        <div class="name" id="agent">ሰላም</div>
+        <div class="role" id="clinicName">የደስታ የጥርስ ክሊኒክ</div>
+      </div>
+      <div id="log"></div>
+      <form id="form">
+        <button class="mic" id="mic" type="button">🎤</button>
+        <input id="input" autocomplete="off" placeholder="ጻፍ ወይም ማይክ... ለምሳሌ ነገ ቀጠሮ እፈልጋለሁ" />
+        <button class="go" type="submit">➤</button>
+      </form>
+    </section>
+
+    <section class="desk" id="deskView">
+      <h1>የተያዙ ቀጠሮዎች</h1>
+      <p class="hint">ሰላም ስትይዝ እዚህ ይወጣል።</p>
+      <div class="card">
+        <table>
+          <thead><tr><th>ቀን</th><th>ሰዓት</th><th>ስም</th><th>ስልክ</th><th>አገልግሎት</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="5">ገና የለም</td></tr></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>የክሊኒክ ስም ቀይር</h3>
+        <p class="hint">ከቀየርክ ሰላም በአዲሱ ስም ትመልሳለች።</p>
+        <input id="cname" style="width:100%;margin:8px 0;border:1px solid var(--line);background:#100e0b;color:var(--cream);border-radius:12px;padding:10px;font:inherit" />
+        <button class="go" id="save" type="button" style="width:100%;border-radius:12px">አስቀምጥ</button>
+      </div>
+    </section>
+  </div>
+<script>
+const CLINIC = {
+  name: "የደስታ የጥርስ ክሊኒክ",
+  phone: "0118 65 00 00",
+  address: "አዲስ አበባ፣ ቦሌ፣ ሳሚ ህንጻ፣ 2ኛ ፎቅ",
+  hours: "ሰኞ–ቅዳሜ ጠዋት 8:30 – ምሽት 6:00",
+  closed: "እሑድ ዝግ ነው",
+  agent: "ሰላም",
+  deposit: 200,
+  services: [
+    {id:"checkup", name:"ምርመራ / ምክክር", price:500},
+    {id:"pain", name:"የጥርስ ህመም / ድንገተኛ", price:800},
+    {id:"clean", name:"የጥርስ ጽዳት", price:1500},
+    {id:"white", name:"የጥርስ ነጣት", price:4500},
+    {id:"fill", name:"መሙላት (ፊሊንግ)", price:2000},
+    {id:"pull", name:"ጥርስ ማውጣት", price:1800}
+  ],
+  slots: ["08:30","09:00","09:30","10:00","10:30","11:00","11:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00"]
+};
+const saved = localStorage.getItem("selam_clinic");
+if (saved) Object.assign(CLINIC, JSON.parse(saved));
+document.getElementById("clinicName").textContent = CLINIC.name;
+document.getElementById("cname").value = CLINIC.name;
+
+const WEEK = ["ሰኞ","ማክሰኞ","ረቡዕ","ሐሙስ","አርብ","ቅዳሜ","እሑድ"];
+const DAYW = {ዛሬ:0,ነገ:1,"ከነገ ወዲያ":2,ሰኞ:"d0",ማክሰኞ:"d1",ረቡዕ:"d2",ሐሙስ:"d3",ሀሙስ:"d3",አርብ:"d4",ቅዳሜ:"d5",እሑድ:"d6",እሁድ:"d6"};
+const SVCS = [
+  ["pain",["ህመም","ሕመም","እየመታ","መታኝ","አመመኝ","ድንገተኛ"]],
+  ["clean",["ጽዳት","ማጽዳት","ክሊኒንግ"]],
+  ["white",["ነጣት","ማንጣት","ብሊች"]],
+  ["fill",["መሙላት","ፊሊንግ","ቀዳዳ"]],
+  ["pull",["ማውጣት","መንቀል"]],
+  ["checkup",["ምርመራ","ምክክር","ቼክ","ቀጠሮ"]]
+];
+function has(t, arr){ return arr.some(w => t.includes(w)); }
+function svc(id){ return CLINIC.services.find(s=>s.id===id) || CLINIC.services[0]; }
+function pad(n){ return String(n).padStart(2,"0"); }
+function iso(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+function loadAppts(){ try { return JSON.parse(localStorage.getItem("selam_appts")||"[]"); } catch { return []; } }
+function saveAppts(a){ localStorage.setItem("selam_appts", JSON.stringify(a)); }
+function taken(date){ return new Set(loadAppts().filter(a=>a.date===date && a.status==="booked").map(a=>a.time)); }
+function free(date){
+  const t = taken(date);
+  const d = new Date(date+"T12:00:00");
+  if (d.getDay()===0) return [];
+  return CLINIC.slots.filter(s=>!t.has(s));
+}
+function prettyDate(isod){
+  const d = new Date(isod+"T12:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dd = new Date(d); dd.setHours(0,0,0,0);
+  const diff = Math.round((dd-today)/86400000);
+  const lab = diff===0?"ዛሬ":diff===1?"ነገ":WEEK[(d.getDay()+6)%7];
+  return lab+" "+d.getDate()+"/"+(d.getMonth()+1);
+}
+function extractDate(t){
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (const [w,v] of Object.entries(DAYW)){
+    if (!t.includes(w)) continue;
+    if (typeof v==="number"){ const d=new Date(today); d.setDate(d.getDate()+v); return iso(d); }
+    const target = Number(v.slice(1));
+    let delta = (target - ((today.getDay()+6)%7) + 7) % 7;
+    if (delta===0) delta=7;
+    const d=new Date(today); d.setDate(d.getDate()+delta); return iso(d);
+  }
+  return null;
+}
+function extractTime(t){
+  const aft = has(t,["ከሰዓት","ምሽት","ማታ"]);
+  const m = t.match(/(\d{1,2})\s*[:፡.]\s*(\d{2})/);
+  if (m){ let h=+m[1]; if(aft && h<=6) h+=12; return pad(h)+":"+m[2]; }
+  const m2 = t.match(/(\d{1,2})\s*(ሰዓት|ሰዓቱ)?/);
+  if (m2 && (t.includes("ሰዓት") || aft || t.includes("ጠዋት"))){
+    let h=+m2[1]; if(aft && h<12) h+=12;
+    const cand = pad(h)+":00";
+    if (CLINIC.slots.includes(cand)) return cand;
+    if (h<=7 && CLINIC.slots.includes(pad(h+12)+":00")) return pad(h+12)+":00";
+  }
+  return null;
+}
+function extractPhone(t){
+  let d=t.replace(/\D/g,"");
+  if (d.startsWith("251") && d.length>=12) d="0"+d.slice(3);
+  if (d.length===10 && (d.startsWith("09")||d.startsWith("07"))) return d;
+  if (d.length===9 && (d.startsWith("9")||d.startsWith("7"))) return "0"+d;
+  return null;
+}
+function extractSvc(t){ for (const [id,ws] of SVCS) if (has(t,ws)) return id; return null; }
+function extractName(t){
+  const m=t.match(/ስሜ\s+(.+)/); if(m) return m[1].trim();
+  if (/[0-9]/.test(t) || has(t,["ቀጠሮ","ሰዓት","ነገ","ዛሬ","አዎ","አይ"])) return null;
+  const p=t.trim().split(/\s+/);
+  if (p.length>=2 && p.length<=4) return t.trim();
+  return null;
+}
+
+let S = {step:"idle", service:null, date:null, time:null, name:null, phone:null};
+
+function reply(text){
+  const t=(text||"").trim();
+  if (!t) return "አልሰማሁም። እንደገና ይንገሩኝ።";
+  if (has(t,["ደም","አደጋ","በጣም እየመታ"])) return "ይህ ድንገተኛ ሊሆን ይችላል። ወደ ቅርብ እርዳታ ይሂዱ ወይም "+CLINIC.phone+" ይደውሉ።";
+  if (has(t,["አድራሻ","የት ነው","የት አለ"])) return "አድራሻችን፦ "+CLINIC.address+"። ስልክ "+CLINIC.phone+"። ቀጠሮ ልይዝልዎት?";
+  if (has(t,["ዋጋ","ስንት ብር","ክፍያ"])) return CLINIC.services.slice(0,4).map(s=>s.name+" ከ"+s.price+" ብር").join("፣ ")+"። የትኛውን ልይዝ?";
+  if (has(t,["ሰዓት ስንት","መክፈቻ","የስራ ሰዓት"])) return CLINIC.hours+"። "+CLINIC.closed+"።";
+  if (has(t,["ሰርዝ","መሰረዝ","አልመጣም"])) { S.step="cancel"; return "ለመሰረዝ ስልክ ቁጥርዎን ይንገሩኝ።"; }
+  if (S.step==="cancel"){
+    const p=extractPhone(t);
+    if(!p) return "ስልክ በ09 የሚጀምር 10 አሃዝ ይንገሩኝ።";
+    const all=loadAppts(); let n=0;
+    all.forEach(a=>{ if(a.phone===p && a.status==="booked"){ a.status="cancelled"; n++; }});
+    saveAppts(all); S.step="idle"; renderDesk();
+    return n? "ቀጠሮው ተሰርዟል። ሌላ ልርዳዎት?":"በዚህ ስልክ ቀጠሮ አላገኘሁም።";
+  }
+  if (["ask_service","ask_day","ask_time","ask_name","ask_phone","confirm"].includes(S.step))
+    return continueBook(t);
+  if (has(t,["ቀጠሮ","እፈልጋለሁ","ልምጣ","መምጣት","ባዶ"]) || extractSvc(t))
+    return startBook(t);
+  return "ሰላም፣ "+CLINIC.name+" ተቀባይ ነኝ። ስሜ "+CLINIC.agent+" ነው። ቀጠሮ ልይዝልዎት፣ አድራሻ ወይም ዋጋ ልንገርዎት?";
+}
+function startBook(t){
+  S={step:"ask_service", service:extractSvc(t), date:extractDate(t), time:extractTime(t), name:extractName(t), phone:extractPhone(t)};
+  return advance();
+}
+function continueBook(t){
+  if (S.step==="ask_service"){
+    S.service = extractSvc(t) || S.service;
+    if (!S.service && /^[1-6]$/.test(t.trim())) S.service = CLINIC.services[+t.trim()-1].id;
+    if (!S.service) return askSvc();
+  } else if (S.step==="ask_day"){
+    const d=extractDate(t); if(!d) return "የትኛው ቀን? ነገ፣ ማክሰኞ፣ አርብ ይበሉ።";
+    S.date=d;
+  } else if (S.step==="ask_time"){
+    const tm=extractTime(t);
+    const fr=free(S.date);
+    if(!tm) return "ሰዓት ይንገሩኝ። ባዶ፦ "+(fr.slice(0,6).join("፣ ")||"የለም");
+    if(!fr.includes(tm)) return tm+" ተይዟል። ባዶ፦ "+fr.slice(0,6).join("፣ ");
+    S.time=tm;
+  } else if (S.step==="ask_name"){
+    const n=extractName(t) || (t.trim().length>=3 && !/\d/.test(t) ? t.trim(): null);
+    if(!n) return "ሙሉ ስም ይንገሩኝ። ለምሳሌ አበበ ከበደ።";
+    S.name=n;
+  } else if (S.step==="ask_phone"){
+    const p=extractPhone(t); if(!p) return "ስልክ በ09 ወይም 07 የሚጀምር 10 አሃዝ።";
+    S.phone=p;
+  } else if (S.step==="confirm"){
+    if (has(t,["አዎ","እሺ","ይሁን","yes","እውነት"])){
+      const a={id:Date.now(), name:S.name, phone:S.phone, service:svc(S.service).name, date:S.date, time:S.time, status:"booked"};
+      const all=loadAppts(); all.push(a); saveAppts(all); renderDesk();
+      const when=prettyDate(S.date)+" "+S.time;
+      const msg="ተይዟል። "+S.name+"፣ "+when+"፣ "+svc(S.service).name+"። አድራሻ፦ "+CLINIC.address+"። ቅድሚያ "+CLINIC.deposit+" ብር በመድረስ። ሌላ ልርዳዎት?";
+      S={step:"idle"}; return msg;
+    }
+    if (has(t,["አይ","የለም","ቀይር"])){ S.date=null; S.time=null; S.step="ask_day"; return "እሺ። የትኛው ቀን?"; }
+    return "«አዎ» ወይም «አይ» ይበሉ።";
+  }
+  return advance();
+}
+function askSvc(){
+  return "ምን አገልግሎት ነው? "+CLINIC.services.map((s,i)=>(i+1)+") "+s.name).join("። ")+"።";
+}
+function advance(){
+  if(!S.service){ S.step="ask_service"; return askSvc(); }
+  if(!S.date){ S.step="ask_day"; return svc(S.service).name+" እንይዛለን። የትኛው ቀን? ነገ ወይም ማክሰኞ ይበሉ።"; }
+  if(!S.time){
+    S.step="ask_time";
+    const fr=free(S.date);
+    if(!fr.length){ S.date=null; S.step="ask_day"; return prettyDate(S.date||"")+" ሙሉ ነው። ሌላ ቀን።"; }
+    return prettyDate(S.date)+" ባዶ፦ "+fr.slice(0,7).join("፣ ")+"። የትኛው?";
+  }
+  if(!S.name){ S.step="ask_name"; return "በማን ስም? ሙሉ ስም ይንገሩኝ።"; }
+  if(!S.phone){ S.step="ask_phone"; return "ስልክ ቁጥርዎን ይንገሩኝ።"; }
+  S.step="confirm";
+  return "ላረጋግጥ፦ "+S.name+"፣ "+prettyDate(S.date)+" "+S.time+"፣ "+svc(S.service).name+"፣ "+S.phone+"። ከ"+svc(S.service).price+" ብር። ትክክል? አዎ ወይም አይ።";
+}
+
+const log = document.getElementById("log");
+function add(role, text){
+  const el=document.createElement("div");
+  el.className="b "+(role==="me"?"me":"ai");
+  el.textContent=text; log.appendChild(el); log.scrollTop=log.scrollHeight;
+}
+function speak(text){
+  if(!speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text); u.lang="am-ET"; u.rate=.95;
+  const v=speechSynthesis.getVoices().find(x=>(x.lang||"").toLowerCase().startsWith("am"));
+  if(v) u.voice=v; speechSynthesis.speak(u);
+}
+function send(text){
+  if(text) add("me", text);
+  const r=reply(text);
+  add("ai", r); speak(r);
+}
+document.getElementById("form").onsubmit=(e)=>{
+  e.preventDefault();
+  const v=document.getElementById("input").value.trim();
+  if(!v) return; document.getElementById("input").value=""; send(v);
+};
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const mic=document.getElementById("mic");
+if(SR){
+  const rec=new SR(); rec.lang="am-ET"; rec.interimResults=false;
+  rec.onresult=(e)=>send(e.results[0][0].transcript);
+  rec.onend=()=>mic.classList.remove("live");
+  mic.onclick=()=>{ mic.classList.add("live"); rec.start(); };
+} else mic.onclick=()=>add("ai","በዚህ ስልክ ማይክ አይሰራም። እባክዎ ጻፉ።");
+
+document.getElementById("tCall").onclick=()=>{
+  document.getElementById("tCall").classList.add("on");
+  document.getElementById("tDesk").classList.remove("on");
+  document.getElementById("callView").style.display="flex";
+  document.getElementById("deskView").classList.remove("on");
+};
+document.getElementById("tDesk").onclick=()=>{
+  document.getElementById("tDesk").classList.add("on");
+  document.getElementById("tCall").classList.remove("on");
+  document.getElementById("callView").style.display="none";
+  document.getElementById("deskView").classList.add("on");
+  renderDesk();
+};
+function renderDesk(){
+  const rows=document.getElementById("rows");
+  const a=loadAppts().filter(x=>x.status==="booked");
+  rows.innerHTML = a.length ? a.map(x=>`<tr><td>${x.date}</td><td>${x.time}</td><td>${x.name}</td><td>${x.phone}</td><td>${x.service}</td></tr>`).join("") : `<tr><td colspan="5">ገና የለም</td></tr>`;
+}
+document.getElementById("save").onclick=()=>{
+  CLINIC.name=document.getElementById("cname").value.trim()||CLINIC.name;
+  localStorage.setItem("selam_clinic", JSON.stringify({name:CLINIC.name}));
+  document.getElementById("clinicName").textContent=CLINIC.name;
+  alert("ተቀይሯል");
+};
+add("ai", reply("ሰላም"));
+</script>
+</body>
+</html>

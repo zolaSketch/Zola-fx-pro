@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}ደውል — ሰላም{% endblock %}
+{% block body %}
+<div class="wrap page">
+  <nav class="nav">
+    <a class="brand" href="/"><span class="logo">ሰ</span> ተመለስ</a>
+    <a class="btn ghost" href="/desk">ጠረጴዛ</a>
+  </nav>
+  <p class="hint">ይህ የስልክ ሙከራ ነው። እንደ ደንበኛ ተናገር። ሰላም ትመልሳለች። ማይክ ከሌለህ በታች ጻፍ።</p>
+  <div class="phone">
+    <div class="phone-top" id="clock">● በመስመር ላይ</div>
+    <div class="screen">
+      <div class="call-status">
+        <div class="avatar pulse" id="avatar">ሰ</div>
+        <div class="who">{{ clinic.agent_name }}</div>
+        <div class="role">{{ clinic.name }}</div>
+      </div>
+      <div class="transcript" id="log"></div>
+      <form class="composer" id="form">
+        <button type="button" class="mic" id="mic" title="ተናገር">🎤</button>
+        <input id="input" autocomplete="off" placeholder="እዚህ ጻፍ ወይም ማይክ ጫን..." />
+        <button class="send" type="submit">➤</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const sid = "web-" + Math.random().toString(36).slice(2, 8);
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+const mic = document.getElementById("mic");
+
+function add(role, text) {
+  const el = document.createElement("div");
+  el.className = "bubble " + (role === "me" ? "me" : "ai");
+  el.textContent = text;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "am-ET";
+  u.rate = 0.95;
+  const voices = speechSynthesis.getVoices();
+  const am = voices.find(v => (v.lang || "").toLowerCase().startsWith("am"));
+  if (am) u.voice = am;
+  speechSynthesis.speak(u);
+}
+
+async function send(text, reset=false) {
+  if (text) add("me", text);
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sid, text, reset })
+  });
+  const data = await res.json();
+  add("ai", data.text);
+  speak(data.text);
+}
+
+form.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const t = input.value.trim();
+  if (!t) return;
+  input.value = "";
+  send(t);
+});
+
+let rec = null;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  rec = new SR();
+  rec.lang = "am-ET";
+  rec.interimResults = false;
+  rec.onresult = (e) => {
+    const t = e.results[0][0].transcript;
+    send(t);
+  };
+  rec.onend = () => mic.classList.remove("live");
+}
+mic.addEventListener("click", () => {
+  if (!rec) {
+    add("ai", "በዚህ ስልክ/ኮምፒውተር የድምጽ መሰብሰብ የለም። እባክዎ በታች ጻፉ።");
+    return;
+  }
+  mic.classList.add("live");
+  rec.start();
+});
+
+send("", true);
+</script>
+{% endblock %}
