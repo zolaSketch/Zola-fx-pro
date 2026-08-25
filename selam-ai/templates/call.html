@@ -14,6 +14,7 @@
         <div class="avatar pulse" id="avatar">ሰ</div>
         <div class="who">{{ clinic.agent_name }}</div>
         <div class="role">{{ clinic.name }}</div>
+        <div class="role">በጽሑፍ ትመልሳለች · ድምጽ ተዘግቷል</div>
       </div>
       <div class="transcript" id="log"></div>
       <form class="composer" id="form">
@@ -41,18 +42,6 @@ function add(role, text) {
   log.scrollTop = log.scrollHeight;
 }
 
-function speak(text) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "am-ET";
-  u.rate = 0.95;
-  const voices = speechSynthesis.getVoices();
-  const am = voices.find(v => (v.lang || "").toLowerCase().startsWith("am"));
-  if (am) u.voice = am;
-  speechSynthesis.speak(u);
-}
-
 async function send(text, reset=false) {
   if (text) add("me", text);
   const res = await fetch("/api/chat", {
@@ -62,7 +51,6 @@ async function send(text, reset=false) {
   });
   const data = await res.json();
   add("ai", data.text);
-  speak(data.text);
 }
 
 form.addEventListener("submit", (e) => {

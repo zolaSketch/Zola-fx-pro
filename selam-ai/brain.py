@@ -79,7 +79,7 @@ class SelamBrain:
         clinic = self.clinic
 
         if not text:
-            return self._say(session, "አልሰማሁም። እባክዎ እንደገና ይንገሩኝ።")
+            return self._say(session, "ይቅርታ፣ አልገባኝም። እባክዎ እንደገና ይጻፉ።")
 
         if has_any(text, ["ደም", "አደጋ", "መተንፈስ", "በጣም እየመታ", "መዋሸት", "ድንገተኛ ክፉ"]):
             return self._say(
@@ -101,21 +101,23 @@ class SelamBrain:
             return self._say(session, "እሺ። ሌላ ስትፈልጉ ደውሉ። ደህና ሁኑ።", end=True)
 
         if has_any(text, ["አድራሻ", "የት ነው", "የት አለ", "መጣራት", "ሎኬሽን", "location"]):
-            return self._say(session, f"አድራሻችን፦ {clinic['address']}። ስልክ {clinic['phone']}። ቀጠሮ ልይዝልዎት?")
+            return self._say(session, f"ክሊኒኩ {clinic['address']} ነው። ስልክ {clinic['phone']} ነው። ቀጠሮ ልይዝልዎት?")
 
         if has_any(text, ["ሰዓት ስንት", "መክፈቻ", "መዝጊያ", "ስንት ትከፍታላችሁ", "የስራ ሰዓት"]):
-            return self._say(session, f"{clinic['hours']}። {clinic['closed']}። ቀጠሮ ልይዝልዎት?")
-
-        if has_any(text, ["ዋጋ", "ስንት ብር", "ክፍያ", "ውድ ነው", "price"]):
-            lines = "፣ ".join(f"{s['name']} ከ{s['price']} ብር" for s in clinic["services"][:4])
             return self._say(
                 session,
-                f"ዋጋ ከአገልግሎት ይለያል። ለምሳሌ {lines}። ትክክለኛው ከምርመራ በኋላ ይወሰናል። የትኛውን ልይዝ?",
+                "ከሰኞ እስከ ቅዳሜ፣ ጠዋት ስምንት ተኩል እስከ ምሽት ስድስት እንከፍታለን። እሑድ ዝግ ነው። ቀጠሮ ልይዝልዎት?",
+            )
+
+        if has_any(text, ["ዋጋ", "ስንት ብር", "ክፍያ", "ውድ ነው", "price"]):
+            return self._say(
+                session,
+                "ምርመራ ከአምስት መቶ ብር ይጀምራል። ጽዳት አንድ ሺህ አምስት መቶ፣ ህመም ስምንት መቶ ነው። የትኛውን ልይዝልዎት?",
             )
 
         if has_any(text, ["ሰርዝ", "ሰርዞ", "አልመጣም", "መሰረዝ", "ካንሰል"]):
             session["step"] = "cancel"
-            return self._say(session, "ቀጠሮ ለመሰረዝ በስልክ የተመዘገቡበትን ቁጥር ይንገሩኝ።")
+            return self._say(session, "ቀጠሮውን ለመሰረዝ የተመዘገቡበትን ስልክ ቁጥር ይጻፉ።")
 
         if session.get("step") == "cancel":
             phone = self._extract_phone(text)
@@ -125,7 +127,7 @@ class SelamBrain:
                 if removed:
                     return self._say(session, f"ቀጠሮው ተሰርዟል። ሌላ ልርዳዎት?")
                 return self._say(session, "በዚህ ስልክ የተያዘ ቀጠሮ አላገኘሁም። ስልኩን እንደገና ይንገሩኝ ወይም ሌላ ልርዳዎት?")
-            return self._say(session, "ስልክ ቁጥር በ09 ወይም 07 የሚጀምር 10 አሃዝ ይንገሩኝ።")
+            return self._say(session, "እባክዎ ስልክ ቁጥርዎን በዜሮ ዘጠኝ የሚጀምር፣ አሥር አሃዝ ይጻፉ።")
 
         # booking flow
         if session.get("step") in {"ask_service", "ask_day", "ask_time", "ask_name", "ask_phone", "confirm"}:
@@ -150,8 +152,8 @@ class SelamBrain:
         c = self.clinic
         return self._say(
             session,
-            f"ሰላም፣ {c['name']} ተቀባይ ነኝ። ስሜ {c['agent_name']} ነው። "
-            "ቀጠሮ ልይዝልዎት፣ አድራሻ ወይም ዋጋ ልንገርዎት?",
+            f"ሰላም። {c['name']} ተቀባይ ነኝ። ስሜ {c['agent_name']} ይባላል። "
+            "ቀጠሮ ልይዝልዎት? ወይስ አድራሻ እና ዋጋ ልንገርዎት?",
         )
 
     def _wants_booking(self, text: str) -> bool:
@@ -181,31 +183,32 @@ class SelamBrain:
         elif step == "ask_day":
             d = self._extract_date(text)
             if not d:
-                return self._say(session, "የትኛው ቀን ነው? ለምሳሌ ነገ፣ ማክሰኞ፣ ወይም አርብ ይበሉ።")
+                return self._say(session, "የትኛው ቀን ይመቾታል? ነገ፣ ማክሰኞ፣ ወይም አርብ ይበሉ።")
             session["date"] = d
         elif step == "ask_time":
             t = self._extract_time(text)
             if not t:
                 free = self._free_slots(session["date"])
-                shown = "፣ ".join(free[:6]) if free else "ዛሬ ባዶ የለም"
-                return self._say(session, f"ሰዓቱን በግልጽ ይንገሩኝ። ባዶ ሰዓቶች፦ {shown}።")
+                shown = "፣ ".join(self._pretty_time(s) for s in free[:5]) if free else "ዛሬ አልቀረም"
+                return self._say(session, f"ሰዓቱን ይንገሩኝ። ያሉ ሰዓቶች፦ {shown}።")
             if t not in self._free_slots(session["date"]):
                 free = self._free_slots(session["date"])
                 if not free:
                     session["date"] = None
                     session["step"] = "ask_day"
                     return self._say(session, "ያ ቀን ሙሉ ነው። ሌላ ቀን ይምረጡ።")
-                return self._say(session, f"{t} ተይዟል። ባዶ፦ {'፣ '.join(free[:6])}። የትኛው?")
+                shown = "፣ ".join(self._pretty_time(s) for s in free[:5])
+                return self._say(session, f"{self._pretty_time(t)} ተይዟል። ያሉት፦ {shown}።")
             session["time"] = t
         elif step == "ask_name":
             name = self._extract_name(text) or (text.strip() if len(text.strip()) >= 3 else None)
             if not name:
-                return self._say(session, "ስምዎን ብቻ ይንገሩኝ። ለምሳሌ አበበ ከበደ።")
+                return self._say(session, "በማን ስም ይያዝ? ሙሉ ስምዎን ይጻፉ። ለምሳሌ፦ አበበ ከበደ።")
             session["name"] = name
         elif step == "ask_phone":
             phone = self._extract_phone(text)
             if not phone:
-                return self._say(session, "ስልክ ቁጥር በ09 ወይም 07 የሚጀምር 10 አሃዝ ይንገሩኝ።")
+                return self._say(session, "ስልክ ቁጥርዎን ይጻፉ። በዜሮ ዘጠኝ የሚጀምር አሥር አሃዝ።")
             session["phone"] = phone
         elif step == "confirm":
             if has_any(text, ["አዎ", "እሺ", "ተስማማሁ", "ይሁን", "እውነት", "አዎን", "ok", "yes"]):
@@ -214,18 +217,17 @@ class SelamBrain:
                 svc = self._service(session["service"])
                 when = self._pretty_when(session["date"], session["time"])
                 msg = (
-                    f"ተይዟል። {session['name']}፣ {when}፣ {svc['name']}። "
-                    f"አድራሻ፦ {self.clinic['address']}። "
-                    f"ቅድሚያ {self.clinic['deposit']} ብር በመድረስ ይከፍላሉ። "
-                    "ከመምጣት አንድ ሰዓት ቢያንሱ ይደውሉ። ሌላ ልርዳዎት?"
+                    f"እሺ፣ ቀጠሮው ተይዟል። {session['name']}፣ {when}፣ {svc['name']}። "
+                    f"ቦታችን {self.clinic['address']} ነው። "
+                    "ሲመጡ ሁለት መቶ ብር ቅድሚያ ይከፍላሉ። ሌላ ልርዳዎት?"
                 )
                 return self._say(session, msg, booked=appt)
             if has_any(text, ["አይ", "የለም", "ቀይር", "ስህተት"]):
                 session["step"] = "ask_day"
                 session["date"] = None
                 session["time"] = None
-                return self._say(session, "እሺ፣ እንደገና እንያዝ። የትኛው ቀን ነው?")
-            return self._say(session, "ለማረጋገጥ «አዎ» ወይም ለመቀየር «አይ» ይበሉ።")
+                return self._say(session, "እሺ፣ እንቀይር። የትኛው ቀን ይመቾታል?")
+            return self._say(session, "ትክክል ከሆነ አዎ ይበሉ። ለመቀየር አይ ይበሉ።")
 
         return self._advance(session)
 
@@ -236,7 +238,7 @@ class SelamBrain:
         if not session.get("date"):
             session["step"] = "ask_day"
             svc = self._service(session["service"])
-            return self._say(session, f"{svc['name']} እንይዛለን። የትኛው ቀን ነው? ነገ፣ ማክሰኞ፣ ወይም ሌላ ቀን ይበሉ።")
+            return self._say(session, f"{svc['name']} እንይዛለን። የትኛው ቀን ይመቾታል? ነገ ወይም ማክሰኞ ማለት ይችላሉ።")
         if not session.get("time"):
             session["step"] = "ask_time"
             free = self._free_slots(session["date"])
@@ -245,25 +247,28 @@ class SelamBrain:
                 session["date"] = None
                 session["step"] = "ask_day"
                 return self._say(session, f"{day} ሙሉ ነው። ሌላ ቀን ይምረጡ።")
-            return self._say(session, f"{day} ባዶ ሰዓቶች፦ {'፣ '.join(free[:7])}። የትኛው ይመቾታል?")
+            shown = "፣ ".join(self._pretty_time(s) for s in free[:5])
+            return self._say(session, f"{day} ያሉ ሰዓቶች {shown} ናቸው። የትኛው ይመቾታል?")
         if not session.get("name"):
             session["step"] = "ask_name"
-            return self._say(session, "በማን ስም ቀጠሮው ይያዝ? ሙሉ ስም ይንገሩኝ።")
+            return self._say(session, "በማን ስም ይያዝ? ሙሉ ስምዎን ይጻፉ።")
         if not session.get("phone"):
             session["step"] = "ask_phone"
-            return self._say(session, "ስልክ ቁጥርዎን ይንገሩኝ።")
+            return self._say(session, "ስልክ ቁጥርዎን ይጻፉ።")
         session["step"] = "confirm"
         svc = self._service(session["service"])
         when = self._pretty_when(session["date"], session["time"])
         return self._say(
             session,
-            f"ላረጋግጥ፦ {session['name']}፣ {when}፣ {svc['name']}፣ ስልክ {session['phone']}። "
-            f"ከ{svc['price']} ብር ይጀምራል። ትክክል ነው? አዎ ወይም አይ ይበሉ።",
+            f"ላረጋግጥ። {session['name']}፣ {when}፣ {svc['name']}። ስልክ {session['phone']}። "
+            "ትክክል ነው? አዎ ወይም አይ ይበሉ።",
         )
 
     def _ask_service(self, session: dict) -> dict:
-        items = [f"{i+1}) {s['name']}" for i, s in enumerate(self.clinic["services"])]
-        return self._say(session, "ምን አይነት አገልግሎት ነው? " + "። ".join(items) + "። ቁጥር ወይም ስም ይበሉ።")
+        return self._say(
+            session,
+            "ምን ልይዝልዎት? አንድ ምርመራ፣ ሁለት የጥርስ ህመም፣ ሦስት ጽዳት፣ አራት ነጣት፣ አምስት መሙላት፣ ስድስት ማውጣት። ቁጥሩን ወይም ስሙን ይጻፉ።",
+        )
 
     def _extract_service(self, text: str) -> str | None:
         for sid, words in SERVICE_WORDS:
@@ -390,10 +395,17 @@ class SelamBrain:
             label = "ነገ"
         else:
             label = WEEKDAYS[d.weekday()]
-        return f"{label} {d.day}/{d.month}"
+        return label
+
+    def _pretty_time(self, hhmm: str) -> str:
+        h, m = (int(x) for x in hhmm.split(":"))
+        part = "ጠዋት" if h < 12 else ("ከሰዓት" if h < 18 else "ምሽት")
+        disp = h % 12 or 12
+        stamp = f"{disp}:{m:02d}" if m else str(disp)
+        return f"{part} {stamp} ሰዓት"
 
     def _pretty_when(self, iso_date: str, time: str) -> str:
-        return f"{self._pretty_date(iso_date)} {time}"
+        return f"{self._pretty_date(iso_date)} {self._pretty_time(time)}"
 
     def _say(self, session: dict, text: str, **extra) -> dict:
         out = {"text": text, "session": session}
